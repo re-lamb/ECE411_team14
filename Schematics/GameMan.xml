@@ -1,0 +1,1157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Users\skeez\Projects\KiCAD\GameMan\GameMan.kicad_sch</source>
+    <date>11/15/2023 3:58:22 PM</date>
+    <tool>Eeschema 7.0.8</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>GAMEMAN HANDHELD BLOCK SCHEMATIC</title>
+        <company>Team 14</company>
+        <rev>A3</rev>
+        <date>2023-11-15</date>
+        <source>GameMan.kicad_sch</source>
+        <comment number="1" value="GAMEMAN"/>
+        <comment number="2" value="DRAFT#2"/>
+        <comment number="3" value="REL"/>
+        <comment number="4" value="2023-11-09"/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>10uF</value>
+      <footprint>GameMan:0805-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f6d00057-a9b4-4ebb-92a3-b8e15dc2c706</tstamps>
+    </comp>
+    <comp ref="C2">
+      <value>10uF</value>
+      <footprint>GameMan:0805-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e8a937b3-4359-4be3-8f02-37aeaeac6469</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>10uF</value>
+      <footprint>GameMan:0805-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f1976166-1059-42df-9499-d2b2ae352856</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>1uF</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e8841915-2191-4a63-a671-f46d91cd009c</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>10uF</value>
+      <footprint>GameMan:0805-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2f410b01-7288-4659-8d25-1737a793f1b0</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>10uF</value>
+      <footprint>GameMan:0805-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>504076d1-902f-4543-9469-c7bbb994b960</tstamps>
+    </comp>
+    <comp ref="C7">
+      <value>1uF</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="C_Small" description="Unpolarized capacitor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Unpolarized capacitor, small symbol"/>
+      <property name="ki_keywords" value="capacitor cap"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1e8cbe4b-ec68-4f3a-91b8-7658974e233c</tstamps>
+    </comp>
+    <comp ref="D1">
+      <value>MBR1020VL</value>
+      <footprint>GameMan:SOD-123</footprint>
+      <libsource lib="Device" part="D_Schottky_Small" description="Schottky diode, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Schottky diode, small symbol"/>
+      <property name="ki_keywords" value="diode Schottky"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>13c3b1b0-f4a9-439e-85af-f4a7bb9fe67c</tstamps>
+    </comp>
+    <comp ref="D2">
+      <value>ORANGE</value>
+      <footprint>GameMan:CHIPLED_0805_NOOUTLINE</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Light emitting diode"/>
+      <property name="ki_keywords" value="LED diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>efbb3f3b-4b83-4335-bcf9-b39927686c66</tstamps>
+    </comp>
+    <comp ref="D3">
+      <value>RED</value>
+      <footprint>GameMan:CHIPLED_0805_NOOUTLINE</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Light emitting diode"/>
+      <property name="ki_keywords" value="LED diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>91c58075-4a80-4a27-a88a-f25d809bb59b</tstamps>
+    </comp>
+    <comp ref="J1">
+      <value>Conn_01x08_Socket</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector" part="Conn_01x08_Socket" description="Generic connector, single row, 01x08, script generated"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Generic connector, single row, 01x08, script generated"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8d97ee47-16d5-4f6f-9977-e14076e97b87</tstamps>
+    </comp>
+    <comp ref="J2">
+      <value>Conn_01x10_Socket</value>
+      <footprint>Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical</footprint>
+      <libsource lib="Connector" part="Conn_01x10_Socket" description="Generic connector, single row, 01x10, script generated"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_description" value="Generic connector, single row, 01x10, script generated"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b1c03895-7b19-4612-838f-5d707c60c1ff</tstamps>
+    </comp>
+    <comp ref="OLED1">
+      <value>DISPLAY</value>
+      <footprint>GameMan:Adafruit_SSD1327</footprint>
+      <libsource lib="Connector" part="Conn_01x08_Socket" description="Generic connector, single row, 01x08, script generated"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_description" value="Generic connector, single row, 01x08, script generated"/>
+      <property name="ki_keywords" value="connector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5905fb33-df60-4933-95bc-f3c41f33e7a5</tstamps>
+    </comp>
+    <comp ref="Q1">
+      <value>DMG3415U</value>
+      <footprint>GameMan:SOT23-R</footprint>
+      <datasheet>https://www.diodes.com/assets/Datasheets/products_inactive_data/ds31735.pdf</datasheet>
+      <libsource lib="GameMan" part="MOSFET-P" description="Adafruit symbol, P-channel enhancement mode MOSFET"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Adafruit symbol, P-channel enhancement mode MOSFET"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>91f8d95b-6c39-4799-a88b-548479ebed5c</tstamps>
+    </comp>
+    <comp ref="Q2">
+      <value>MMBT2222A</value>
+      <footprint>GameMan:SOT23-3</footprint>
+      <datasheet>https://www.mccsemi.com/pdf/Products/MMBT2222A(SOT-23).pdf</datasheet>
+      <libsource lib="GameMan" part="MMBT2222A" description="NPN BJT transistor in SOT23-3 package"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="NPN BJT transistor in SOT23-3 package"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>456ae340-12a9-43d8-b247-198d5721f0f7</tstamps>
+    </comp>
+    <comp ref="Q3">
+      <value>MMBT2222A</value>
+      <footprint>GameMan:SOT23-3</footprint>
+      <datasheet>https://www.mccsemi.com/pdf/Products/MMBT2222A(SOT-23).pdf</datasheet>
+      <libsource lib="GameMan" part="MMBT2222A" description="NPN BJT transistor in SOT23-3 package"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="NPN BJT transistor in SOT23-3 package"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f0c71374-b6b2-4945-926f-791e0a010aee</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>100K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>191ea78f-4848-4882-9f1a-a2f20ab3b6f7</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>100K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1bbe8236-9ea1-456e-8711-d72040e37799</tstamps>
+    </comp>
+    <comp ref="R3">
+      <value>4.7K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f473e7ac-b17e-4c74-b6ae-19a105359b03</tstamps>
+    </comp>
+    <comp ref="R4">
+      <value>100K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b9632f1d-026f-40a0-965f-ffef3949a77e</tstamps>
+    </comp>
+    <comp ref="R5">
+      <value>10K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1ef5d4de-41a9-4b50-93f8-53b6861c33fd</tstamps>
+    </comp>
+    <comp ref="R6">
+      <value>1K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fe5a7ac4-56fc-41eb-a8f4-333621b51283</tstamps>
+    </comp>
+    <comp ref="R7">
+      <value>100K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>dfea215f-6e3d-4330-add3-cc77e60d48f3</tstamps>
+    </comp>
+    <comp ref="R8">
+      <value>10K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>37947ca6-82fd-400d-a852-18a09d5ff732</tstamps>
+    </comp>
+    <comp ref="R9">
+      <value>10K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e47b6650-9975-45fe-bd3e-49ff7389eb12</tstamps>
+    </comp>
+    <comp ref="R10">
+      <value>1K</value>
+      <footprint>GameMan:0603-NO</footprint>
+      <libsource lib="Device" part="R_Small" description="Resistor, small symbol"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Resistor, small symbol"/>
+      <property name="ki_keywords" value="R resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9d9ad209-c493-49fa-98b4-b278d4e02b3e</tstamps>
+    </comp>
+    <comp ref="SW1">
+      <value>RST</value>
+      <footprint>GameMan:BTN_KMR2_4.6X2.8</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT4.6X2.8" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>45ade653-5868-4d1f-96eb-d6fb1067162a</tstamps>
+    </comp>
+    <comp ref="SW2">
+      <value>A</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e8b820a5-6a6c-42ac-8183-183157381f01</tstamps>
+    </comp>
+    <comp ref="SW3">
+      <value>B</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fd902cbf-c2c5-4f09-9cc6-674e44de55a6</tstamps>
+    </comp>
+    <comp ref="SW4">
+      <value>C</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fe103fa6-f093-4484-84c6-e4ace8f6a677</tstamps>
+    </comp>
+    <comp ref="SW5">
+      <value>LT</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9ef7d665-3558-4d43-b4ac-ec207f24d71f</tstamps>
+    </comp>
+    <comp ref="SW6">
+      <value>UP</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>85dd6955-d6bb-4ae4-a24d-d11084f5321b</tstamps>
+    </comp>
+    <comp ref="SW7">
+      <value>RT</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>6b4d2407-4874-4f41-b8fc-1f15192b27b3</tstamps>
+    </comp>
+    <comp ref="SW8">
+      <value>DN</value>
+      <footprint>Button_Switch_SMD:SW_SPST_PTS645</footprint>
+      <libsource lib="GameMan" part="SWITCH_TACT_SMT" description="SMT tactile momentary switch, PT645 footprint"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="SMT tactile momentary switch, PT645 footprint"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>547257f2-2cf7-4fb8-97e0-ca871db7c5fc</tstamps>
+    </comp>
+    <comp ref="SW9">
+      <value>SW_SPST</value>
+      <footprint>Button_Switch_SMD:SW_SPDT_PCM12</footprint>
+      <libsource lib="Switch" part="SW_SPST" description="Single Pole Single Throw (SPST) switch"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Single Pole Single Throw (SPST) switch"/>
+      <property name="ki_keywords" value="switch lever"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>0f031e35-ba07-4e35-a462-3546be01d0d9</tstamps>
+    </comp>
+    <comp ref="U1">
+      <value>AP2112</value>
+      <footprint>GameMan:SOT23-5</footprint>
+      <datasheet>https://www.diodes.com/assets/Datasheets/AP2112.pdf</datasheet>
+      <libsource lib="GameMan" part="AP2112-3.3" description="600mA CMOS LDO regulator with enable"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="600mA CMOS LDO regulator with enable"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ad611c5d-a08f-4034-866b-a4c05812953c</tstamps>
+    </comp>
+    <comp ref="U2">
+      <value>~</value>
+      <footprint>GameMan:QFN24_4MM_SMSC</footprint>
+      <datasheet>https://www.silabs.com/documents/public/data-sheets/cp2104.pdf</datasheet>
+      <libsource lib="GameMan" part="CP2104" description="USB to UART bridge"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="USB to UART bridge"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a9e2408d-347e-4b1a-9a12-de416b5a4038 76b612e4-7c52-4175-8524-d1ce93d141aa</tstamps>
+    </comp>
+    <comp ref="U3">
+      <value>~</value>
+      <footprint>GameMan:SOT23-5</footprint>
+      <datasheet>https://ww1.microchip.com/downloads/en/DeviceDoc/MCP73831-Family-Data-Sheet-DS20001984H.pdf</datasheet>
+      <libsource lib="GameMan" part="MCP73831/2" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>dbb23a9d-16a8-4d6d-ac84-d0752f94d59c</tstamps>
+    </comp>
+    <comp ref="U4">
+      <value>~</value>
+      <footprint>GameMan:ESP32-WROOM-32E</footprint>
+      <datasheet>https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf</datasheet>
+      <libsource lib="GameMan" part="ESP32_WROOM32_GM" description="Custom layout for the GameMan ESP32-WROOM-32E module"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Custom layout for the GameMan ESP32-WROOM-32E module"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c92ba889-7ebb-4cf0-a7b4-6ceab19e309e</tstamps>
+    </comp>
+    <comp ref="X1">
+      <value>~</value>
+      <footprint>GameMan:JSTPH2</footprint>
+      <datasheet>https://cdn-shop.adafruit.com/datasheets/17311.pdf</datasheet>
+      <libsource lib="GameMan" part="CON_JST_PH_2PIN" description="JST PH 2-pin connector, SMT, right angle"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="JST PH 2-pin connector, SMT, right angle"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2dc995af-cb2f-42b2-8adf-26f6d8e76d12</tstamps>
+    </comp>
+    <comp ref="X2">
+      <value>AMP 10118194</value>
+      <datasheet>https://www.amphenol-cs.com/media/wysiwyg/files/drawing/10118194.pdf</datasheet>
+      <libsource lib="GameMan" part="10118194-0001LF" description="Amphenol Micro USB connector, SMT w/thru-hole strain relief"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="GameMan.kicad_sch"/>
+      <property name="ki_description" value="Amphenol Micro USB connector, SMT w/thru-hole strain relief"/>
+      <property name="ki_keywords" value="10118194-0001LF"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4a10449e-ab1f-478e-b73e-2a6b5a9aa406</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector" part="Conn_01x08_Socket">
+      <description>Generic connector, single row, 01x08, script generated</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x08_Socket</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector" part="Conn_01x10_Socket">
+      <description>Generic connector, single row, 01x10, script generated</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x10_Socket</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+        <pin num="9" name="Pin_9" type="passive"/>
+        <pin num="10" name="Pin_10" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C_Small">
+      <description>Unpolarized capacitor, small symbol</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C_Small</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="D_Schottky_Small">
+      <description>Schottky diode, small symbol</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>TO-???*</fp>
+        <fp>*_Diode_*</fp>
+        <fp>*SingleDiode*</fp>
+        <fp>D_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">D_Schottky_Small</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED">
+      <description>Light emitting diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R_Small">
+      <description>Resistor, small symbol</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R_Small</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="10118194-0001LF">
+      <description>Amphenol Micro USB connector, SMT w/thru-hole strain relief</description>
+      <docs>https://www.amphenol-cs.com/media/wysiwyg/files/drawing/10118194.pdf</docs>
+      <footprints>
+        <fp>CONN_10118194-0001LF_AMP</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">X</field>
+        <field name="Value">10118194</field>
+        <field name="Footprint">CONN_10118194-0001LF_AMP</field>
+        <field name="Datasheet">https://www.amphenol-cs.com/media/wysiwyg/files/drawing/10118194.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VBUS" type="power_in"/>
+        <pin num="2" name="D-" type="bidirectional"/>
+        <pin num="3" name="D+" type="bidirectional"/>
+        <pin num="4" name="ID" type="bidirectional"/>
+        <pin num="5" name="GND" type="power_in"/>
+        <pin num="6" name="SR" type="no_connect"/>
+        <pin num="7" name="SR" type="no_connect"/>
+        <pin num="8" name="SR" type="no_connect"/>
+        <pin num="9" name="SR" type="no_connect"/>
+        <pin num="10" name="GNDPAD" type="passive"/>
+        <pin num="11" name="GNDPAD" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="AP2112-3.3">
+      <description>600mA CMOS LDO regulator with enable</description>
+      <docs>https://www.diodes.com/assets/Datasheets/AP2112.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-5_HandSoldering</field>
+        <field name="Datasheet">https://www.diodes.com/assets/Datasheets/AP2112.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VIN" type="power_in"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="EN" type="input"/>
+        <pin num="4" name="NC" type="no_connect"/>
+        <pin num="5" name="VOUT" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="CON_JST_PH_2PIN">
+      <description>JST PH 2-pin connector, SMT, right angle</description>
+      <docs>https://cdn-shop.adafruit.com/datasheets/17311.pdf</docs>
+      <fields>
+        <field name="Reference">X</field>
+        <field name="Footprint">GameMan:JSTPH2</field>
+        <field name="Datasheet">https://cdn-shop.adafruit.com/datasheets/17311.pdf</field>
+      </fields>
+      <pins>
+        <pin num="" name="NC1" type="no_connect"/>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="CP2104">
+      <description>USB to UART bridge</description>
+      <docs>https://www.silabs.com/documents/public/data-sheets/cp2104.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Footprint">GameMan:QFN24_4MM_SMSC</field>
+        <field name="Datasheet">https://www.silabs.com/documents/public/data-sheets/cp2104.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="RI" type="input"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="D+" type="bidirectional"/>
+        <pin num="4" name="D-" type="bidirectional"/>
+        <pin num="5" name="VIO" type="power_in"/>
+        <pin num="6" name="VDD" type="power_in"/>
+        <pin num="7" name="REGIN" type="power_in"/>
+        <pin num="8" name="VBUS" type="power_in"/>
+        <pin num="9" name="#RST" type="bidirectional"/>
+        <pin num="10" name="NC" type="no_connect"/>
+        <pin num="11" name="GPIO3" type="bidirectional"/>
+        <pin num="12" name="GPIO2" type="bidirectional"/>
+        <pin num="13" name="GPIO1/RXLED" type="bidirectional"/>
+        <pin num="14" name="GPIO0/TXLED" type="bidirectional"/>
+        <pin num="15" name="#SUSPEND" type="output"/>
+        <pin num="16" name="VPP" type="bidirectional"/>
+        <pin num="17" name="SUSPEND" type="output"/>
+        <pin num="18" name="CTS" type="input"/>
+        <pin num="19" name="RTS" type="output"/>
+        <pin num="20" name="RXD" type="input"/>
+        <pin num="21" name="TXD" type="output"/>
+        <pin num="22" name="DSR" type="input"/>
+        <pin num="23" name="DTR" type="output"/>
+        <pin num="24" name="DCD" type="input"/>
+        <pin num="THERM" name="TP" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="ESP32_WROOM32_GM">
+      <description>Custom layout for the GameMan ESP32-WROOM-32E module</description>
+      <docs>https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Footprint">GameMan:ESP32-WROOM-32E</field>
+        <field name="Datasheet">https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="passive"/>
+        <pin num="2" name="3.3V" type="power_in"/>
+        <pin num="3" name="EN" type="input"/>
+        <pin num="4" name="SENSOR_VP" type="input"/>
+        <pin num="5" name="SENSOR_VN" type="input"/>
+        <pin num="6" name="IO34" type="input"/>
+        <pin num="7" name="IO35" type="input"/>
+        <pin num="8" name="IO32/BTN_A" type="bidirectional"/>
+        <pin num="9" name="IO33/BTN_B" type="bidirectional"/>
+        <pin num="10" name="IO25/BTN_N" type="bidirectional"/>
+        <pin num="11" name="IO26/BTN_E" type="bidirectional"/>
+        <pin num="12" name="IO27/BTN_S" type="bidirectional"/>
+        <pin num="13" name="IO14/BTN_W" type="bidirectional"/>
+        <pin num="14" name="MTDI/IO12" type="bidirectional"/>
+        <pin num="15" name="GND" type="passive"/>
+        <pin num="16" name="LED/IO13" type="bidirectional"/>
+        <pin num="17" name="NC" type="no_connect"/>
+        <pin num="18" name="NC" type="no_connect"/>
+        <pin num="19" name="NC" type="no_connect"/>
+        <pin num="20" name="NC" type="no_connect"/>
+        <pin num="21" name="NC" type="no_connect"/>
+        <pin num="22" name="NC" type="no_connect"/>
+        <pin num="23" name="MTDO/IO15" type="bidirectional"/>
+        <pin num="24" name="IO2" type="bidirectional"/>
+        <pin num="25" name="IO0/RTS" type="bidirectional"/>
+        <pin num="26" name="IO4/BTN_C" type="bidirectional"/>
+        <pin num="27" name="SDC/IO16" type="bidirectional"/>
+        <pin num="28" name="SCS/IO17" type="bidirectional"/>
+        <pin num="29" name="SCLK/IO5" type="bidirectional"/>
+        <pin num="30" name="SDATA/IO18" type="bidirectional"/>
+        <pin num="31" name="IO19" type="bidirectional"/>
+        <pin num="32" name="NC" type="no_connect"/>
+        <pin num="33" name="SRST/IO21" type="bidirectional"/>
+        <pin num="34" name="RXD0" type="input"/>
+        <pin num="35" name="TXD0" type="output"/>
+        <pin num="36" name="IO22" type="bidirectional"/>
+        <pin num="37" name="IO23" type="bidirectional"/>
+        <pin num="38" name="GND" type="passive"/>
+        <pin num="39" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="MCP73831/2">
+      <docs>https://ww1.microchip.com/downloads/en/DeviceDoc/MCP73831-Family-Data-Sheet-DS20001984H.pdf</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Footprint">GameMan:SOT23-5</field>
+        <field name="Datasheet">https://ww1.microchip.com/downloads/en/DeviceDoc/MCP73831-Family-Data-Sheet-DS20001984H.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="STAT" type="output"/>
+        <pin num="2" name="VSS" type="power_in"/>
+        <pin num="3" name="VBAT" type="power_in"/>
+        <pin num="4" name="VDD" type="power_in"/>
+        <pin num="5" name="PROG" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="MMBT2222A">
+      <description>NPN BJT transistor in SOT23-3 package</description>
+      <docs>https://www.mccsemi.com/pdf/Products/MMBT2222A(SOT-23).pdf</docs>
+      <fields>
+        <field name="Reference">Q?</field>
+        <field name="Value">NPN</field>
+        <field name="Footprint">GameMan:SOT23-3</field>
+        <field name="Datasheet">https://www.mccsemi.com/pdf/Products/MMBT2222A(SOT-23).pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="B" type="passive"/>
+        <pin num="2" name="E" type="passive"/>
+        <pin num="3" name="C" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="MOSFET-P">
+      <description>Adafruit symbol, P-channel enhancement mode MOSFET</description>
+      <docs>https://www.diodes.com/assets/Datasheets/products_inactive_data/ds31735.pdf</docs>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">DMG3415U</field>
+        <field name="Footprint">GameMan:SOT23-R</field>
+        <field name="Datasheet">https://www.diodes.com/assets/Datasheets/products_inactive_data/ds31735.pdf</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G" type="passive"/>
+        <pin num="2" name="S" type="passive"/>
+        <pin num="3" name="D" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="SWITCH_TACT_SMT">
+      <description>SMT tactile momentary switch, PT645 footprint</description>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Footprint">Button_Switch_SMD:SW_SPST_PTS645</field>
+      </fields>
+      <pins>
+        <pin num="1" name="P" type="passive"/>
+        <pin num="2" name="S" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="GameMan" part="SWITCH_TACT_SMT4.6X2.8">
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Footprint">GameMan:BTN_KMR2_4.6X2.8</field>
+      </fields>
+      <pins>
+        <pin num="A" name="P" type="passive"/>
+        <pin num="A'" name="P1" type="passive"/>
+        <pin num="B" name="S" type="passive"/>
+        <pin num="B'" name="S1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_SPST">
+      <description>Single Pole Single Throw (SPST) switch</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_SPST</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="A" type="passive"/>
+        <pin num="2" name="B" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector">
+      <uri>C:\Program Files\KiCad\7.0\share\kicad\symbols\/Connector.kicad_sym</uri>
+    </library>
+    <library logical="Device">
+      <uri>C:\Program Files\KiCad\7.0\share\kicad\symbols\/Device.kicad_sym</uri>
+    </library>
+    <library logical="GameMan">
+      <uri>C:\Users\skeez\Projects\KiCAD\GameMan/GameMan.kicad_sym</uri>
+    </library>
+    <library logical="Switch">
+      <uri>C:\Program Files\KiCad\7.0\share\kicad\symbols\/Switch.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3.3V">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="J1" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="OLED1" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="R9" pin="2" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="VOUT" pintype="power_out"/>
+      <node ref="U2" pin="5" pinfunction="VIO" pintype="power_in"/>
+      <node ref="U2" pin="6" pinfunction="VDD" pintype="power_in"/>
+      <node ref="U2" pin="7" pinfunction="REGIN" pintype="power_in"/>
+      <node ref="U4" pin="2" pinfunction="3.3V" pintype="power_in"/>
+    </net>
+    <net code="2" name="/BTN_A">
+      <node ref="SW2" pin="2" pinfunction="S1" pintype="passive"/>
+      <node ref="U4" pin="8" pinfunction="IO32/BTN_A" pintype="bidirectional"/>
+    </net>
+    <net code="3" name="/BTN_B">
+      <node ref="SW3" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="U4" pin="9" pinfunction="IO33/BTN_B" pintype="bidirectional"/>
+    </net>
+    <net code="4" name="/BTN_C">
+      <node ref="SW4" pin="2" pinfunction="S1" pintype="passive"/>
+      <node ref="U4" pin="26" pinfunction="IO4/BTN_C" pintype="bidirectional"/>
+    </net>
+    <net code="5" name="/BTN_E">
+      <node ref="SW7" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="U4" pin="11" pinfunction="IO26/BTN_E" pintype="bidirectional"/>
+    </net>
+    <net code="6" name="/BTN_N">
+      <node ref="SW6" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="U4" pin="10" pinfunction="IO25/BTN_N" pintype="bidirectional"/>
+    </net>
+    <net code="7" name="/BTN_S">
+      <node ref="SW8" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="U4" pin="12" pinfunction="IO27/BTN_S" pintype="bidirectional"/>
+    </net>
+    <net code="8" name="/BTN_W">
+      <node ref="SW5" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="U4" pin="13" pinfunction="IO14/BTN_W" pintype="bidirectional"/>
+    </net>
+    <net code="9" name="/D+">
+      <node ref="U2" pin="3" pinfunction="D+" pintype="bidirectional"/>
+      <node ref="X2" pin="3" pinfunction="D+" pintype="bidirectional"/>
+    </net>
+    <net code="10" name="/D-">
+      <node ref="U2" pin="4" pinfunction="D-" pintype="bidirectional"/>
+      <node ref="X2" pin="2" pinfunction="D-" pintype="bidirectional"/>
+    </net>
+    <net code="11" name="/DISP_SPI_CLK">
+      <node ref="J1" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="OLED1" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="U4" pin="29" pinfunction="SCLK/IO5" pintype="bidirectional"/>
+    </net>
+    <net code="12" name="/DISP_SPI_CS">
+      <node ref="J1" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="OLED1" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="U4" pin="28" pinfunction="SCS/IO17" pintype="bidirectional"/>
+    </net>
+    <net code="13" name="/DISP_SPI_DATA">
+      <node ref="J1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="OLED1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="U4" pin="30" pinfunction="SDATA/IO18" pintype="bidirectional"/>
+    </net>
+    <net code="14" name="/DISP_SPI_DC">
+      <node ref="J1" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="OLED1" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="U4" pin="27" pinfunction="SDC/IO16" pintype="bidirectional"/>
+    </net>
+    <net code="15" name="/DISP_SPI_RST">
+      <node ref="J1" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="OLED1" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="U4" pin="33" pinfunction="SRST/IO21" pintype="bidirectional"/>
+    </net>
+    <net code="16" name="/DTR">
+      <node ref="Q3" pin="2" pinfunction="E" pintype="passive"/>
+      <node ref="R5" pin="2" pintype="passive"/>
+      <node ref="U2" pin="23" pinfunction="DTR" pintype="output"/>
+    </net>
+    <net code="17" name="/EN">
+      <node ref="SW9" pin="2" pinfunction="B" pintype="passive"/>
+      <node ref="U1" pin="3" pinfunction="EN" pintype="input"/>
+    </net>
+    <net code="18" name="/IO0">
+      <node ref="Q3" pin="3" pinfunction="C" pintype="passive"/>
+      <node ref="U4" pin="25" pinfunction="IO0/RTS" pintype="bidirectional"/>
+    </net>
+    <net code="19" name="/IO2">
+      <node ref="J2" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="U4" pin="24" pinfunction="IO2" pintype="bidirectional"/>
+    </net>
+    <net code="20" name="/IO12">
+      <node ref="J2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="U4" pin="14" pinfunction="MTDI/IO12" pintype="bidirectional"/>
+    </net>
+    <net code="21" name="/IO15">
+      <node ref="J2" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="U4" pin="23" pinfunction="MTDO/IO15" pintype="bidirectional"/>
+    </net>
+    <net code="22" name="/IO19">
+      <node ref="J2" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="U4" pin="31" pinfunction="IO19" pintype="bidirectional"/>
+    </net>
+    <net code="23" name="/IO22">
+      <node ref="J2" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="U4" pin="36" pinfunction="IO22" pintype="bidirectional"/>
+    </net>
+    <net code="24" name="/IO23">
+      <node ref="J2" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="U4" pin="37" pinfunction="IO23" pintype="bidirectional"/>
+    </net>
+    <net code="25" name="/IO34">
+      <node ref="J2" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="U4" pin="6" pinfunction="IO34" pintype="input"/>
+    </net>
+    <net code="26" name="/IO36">
+      <node ref="J2" pin="9" pinfunction="Pin_9" pintype="passive"/>
+      <node ref="U4" pin="4" pinfunction="SENSOR_VP" pintype="input"/>
+    </net>
+    <net code="27" name="/IO39">
+      <node ref="J2" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="U4" pin="5" pinfunction="SENSOR_VN" pintype="input"/>
+    </net>
+    <net code="28" name="/LED">
+      <node ref="R10" pin="1" pintype="passive"/>
+      <node ref="U4" pin="16" pinfunction="LED/IO13" pintype="bidirectional"/>
+    </net>
+    <net code="29" name="/NC">
+      <node ref="J1" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="OLED1" pin="6" pinfunction="Pin_6" pintype="passive"/>
+    </net>
+    <net code="30" name="/RESET">
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="Q2" pin="3" pinfunction="C" pintype="passive"/>
+      <node ref="R9" pin="1" pintype="passive"/>
+      <node ref="SW1" pin="B" pinfunction="S" pintype="passive"/>
+      <node ref="SW1" pin="B'" pinfunction="S1" pintype="passive"/>
+      <node ref="U4" pin="3" pinfunction="EN" pintype="input"/>
+    </net>
+    <net code="31" name="/RTS">
+      <node ref="Q2" pin="2" pinfunction="E" pintype="passive"/>
+      <node ref="R8" pin="2" pintype="passive"/>
+      <node ref="U2" pin="19" pinfunction="RTS" pintype="output"/>
+    </net>
+    <net code="32" name="/RXD0">
+      <node ref="U2" pin="21" pinfunction="TXD" pintype="output"/>
+      <node ref="U4" pin="34" pinfunction="RXD0" pintype="input"/>
+    </net>
+    <net code="33" name="/TXD0">
+      <node ref="U2" pin="20" pinfunction="RXD" pintype="input"/>
+      <node ref="U4" pin="35" pinfunction="TXD0" pintype="output"/>
+    </net>
+    <net code="34" name="/VBAT">
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="Q1" pin="3" pinfunction="D" pintype="passive"/>
+      <node ref="R4" pin="2" pintype="passive"/>
+      <node ref="U3" pin="3" pinfunction="VBAT" pintype="power_in"/>
+      <node ref="X1" pin="2" pinfunction="2" pintype="passive"/>
+    </net>
+    <net code="35" name="/VBAT_SENSE">
+      <node ref="R4" pin="1" pintype="passive"/>
+      <node ref="R7" pin="2" pintype="passive"/>
+      <node ref="U4" pin="7" pinfunction="IO35" pintype="input"/>
+    </net>
+    <net code="36" name="/VBUS">
+      <node ref="D1" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="D2" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="Q1" pin="1" pinfunction="G" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+      <node ref="U2" pin="8" pinfunction="VBUS" pintype="power_in"/>
+      <node ref="U3" pin="4" pinfunction="VDD" pintype="power_in"/>
+      <node ref="X2" pin="1" pinfunction="VBUS" pintype="power_in"/>
+    </net>
+    <net code="37" name="/VIN">
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="D1" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="Q1" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="U1" pin="1" pinfunction="VIN" pintype="power_in"/>
+    </net>
+    <net code="38" name="GND">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="D3" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="J1" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="J2" pin="10" pinfunction="Pin_10" pintype="passive"/>
+      <node ref="OLED1" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+      <node ref="R3" pin="2" pintype="passive"/>
+      <node ref="R7" pin="1" pintype="passive"/>
+      <node ref="SW1" pin="A" pinfunction="P" pintype="passive"/>
+      <node ref="SW1" pin="A'" pinfunction="P1" pintype="passive"/>
+      <node ref="SW2" pin="1" pinfunction="P1" pintype="passive"/>
+      <node ref="SW3" pin="1" pinfunction="P1" pintype="passive"/>
+      <node ref="SW4" pin="1" pinfunction="P" pintype="passive"/>
+      <node ref="SW5" pin="1" pinfunction="P1" pintype="passive"/>
+      <node ref="SW6" pin="1" pinfunction="P" pintype="passive"/>
+      <node ref="SW7" pin="1" pinfunction="P1" pintype="passive"/>
+      <node ref="SW8" pin="1" pinfunction="P" pintype="passive"/>
+      <node ref="U1" pin="2" pinfunction="GND" pintype="power_in"/>
+      <node ref="U2" pin="2" pinfunction="GND" pintype="power_in"/>
+      <node ref="U2" pin="THERM" pinfunction="TP" pintype="power_in"/>
+      <node ref="U3" pin="2" pinfunction="VSS" pintype="power_in"/>
+      <node ref="U4" pin="1" pinfunction="GND" pintype="passive"/>
+      <node ref="U4" pin="15" pinfunction="GND" pintype="passive"/>
+      <node ref="U4" pin="38" pinfunction="GND" pintype="passive"/>
+      <node ref="U4" pin="39" pinfunction="GND" pintype="passive"/>
+      <node ref="X1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="X2" pin="10" pinfunction="GNDPAD" pintype="passive"/>
+      <node ref="X2" pin="11" pinfunction="GNDPAD" pintype="passive"/>
+      <node ref="X2" pin="5" pinfunction="GND" pintype="power_in"/>
+    </net>
+    <net code="39" name="Net-(D2-K)">
+      <node ref="D2" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="R6" pin="1" pintype="passive"/>
+    </net>
+    <net code="40" name="Net-(D3-A)">
+      <node ref="D3" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="R10" pin="2" pintype="passive"/>
+    </net>
+    <net code="41" name="Net-(Q2-B)">
+      <node ref="Q2" pin="1" pinfunction="B" pintype="passive"/>
+      <node ref="R5" pin="1" pintype="passive"/>
+    </net>
+    <net code="42" name="Net-(Q3-B)">
+      <node ref="Q3" pin="1" pinfunction="B" pintype="passive"/>
+      <node ref="R8" pin="1" pintype="passive"/>
+    </net>
+    <net code="43" name="Net-(SW9-A)">
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="SW9" pin="1" pinfunction="A" pintype="passive"/>
+    </net>
+    <net code="44" name="Net-(U3-PROG)">
+      <node ref="R3" pin="1" pintype="passive"/>
+      <node ref="U3" pin="5" pinfunction="PROG" pintype="input"/>
+    </net>
+    <net code="45" name="Net-(U3-STAT)">
+      <node ref="R6" pin="2" pintype="passive"/>
+      <node ref="U3" pin="1" pinfunction="STAT" pintype="output"/>
+    </net>
+    <net code="46" name="unconnected-(U1-NC-Pad4)">
+      <node ref="U1" pin="4" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="47" name="unconnected-(U2A-#RST-Pad9)">
+      <node ref="U2" pin="9" pinfunction="#RST" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="48" name="unconnected-(U2A-#SUSPEND-Pad15)">
+      <node ref="U2" pin="15" pinfunction="#SUSPEND" pintype="output+no_connect"/>
+    </net>
+    <net code="49" name="unconnected-(U2A-CTS-Pad18)">
+      <node ref="U2" pin="18" pinfunction="CTS" pintype="input+no_connect"/>
+    </net>
+    <net code="50" name="unconnected-(U2A-DCD-Pad24)">
+      <node ref="U2" pin="24" pinfunction="DCD" pintype="input+no_connect"/>
+    </net>
+    <net code="51" name="unconnected-(U2A-DSR-Pad22)">
+      <node ref="U2" pin="22" pinfunction="DSR" pintype="input+no_connect"/>
+    </net>
+    <net code="52" name="unconnected-(U2A-GPIO0{slash}TXLED-Pad14)">
+      <node ref="U2" pin="14" pinfunction="GPIO0/TXLED" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="53" name="unconnected-(U2A-GPIO1{slash}RXLED-Pad13)">
+      <node ref="U2" pin="13" pinfunction="GPIO1/RXLED" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="54" name="unconnected-(U2A-GPIO2-Pad12)">
+      <node ref="U2" pin="12" pinfunction="GPIO2" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="55" name="unconnected-(U2A-GPIO3-Pad11)">
+      <node ref="U2" pin="11" pinfunction="GPIO3" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="56" name="unconnected-(U2A-NC-Pad10)">
+      <node ref="U2" pin="10" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="57" name="unconnected-(U2A-RI-Pad1)">
+      <node ref="U2" pin="1" pinfunction="RI" pintype="input+no_connect"/>
+    </net>
+    <net code="58" name="unconnected-(U2A-SUSPEND-Pad17)">
+      <node ref="U2" pin="17" pinfunction="SUSPEND" pintype="output+no_connect"/>
+    </net>
+    <net code="59" name="unconnected-(U2A-VPP-Pad16)">
+      <node ref="U2" pin="16" pinfunction="VPP" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="60" name="unconnected-(U4-NC-Pad17)">
+      <node ref="U4" pin="17" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="61" name="unconnected-(U4-NC-Pad18)">
+      <node ref="U4" pin="18" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="62" name="unconnected-(U4-NC-Pad19)">
+      <node ref="U4" pin="19" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="63" name="unconnected-(U4-NC-Pad20)">
+      <node ref="U4" pin="20" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="64" name="unconnected-(U4-NC-Pad21)">
+      <node ref="U4" pin="21" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="65" name="unconnected-(U4-NC-Pad22)">
+      <node ref="U4" pin="22" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="66" name="unconnected-(U4-NC-Pad32)">
+      <node ref="U4" pin="32" pinfunction="NC" pintype="no_connect"/>
+    </net>
+    <net code="67" name="unconnected-(X1-NC1-Pad)">
+      <node ref="X1" pin="" pinfunction="NC1" pintype="no_connect"/>
+    </net>
+    <net code="68" name="unconnected-(X1-NC2-Pad)">
+      <node ref="X1" pin="" pinfunction="NC2" pintype="no_connect"/>
+    </net>
+    <net code="69" name="unconnected-(X2-ID-Pad4)">
+      <node ref="X2" pin="4" pinfunction="ID" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="70" name="unconnected-(X2-SR-Pad6)">
+      <node ref="X2" pin="6" pinfunction="SR" pintype="no_connect"/>
+    </net>
+    <net code="71" name="unconnected-(X2-SR-Pad7)">
+      <node ref="X2" pin="7" pinfunction="SR" pintype="no_connect"/>
+    </net>
+    <net code="72" name="unconnected-(X2-SR-Pad8)">
+      <node ref="X2" pin="8" pinfunction="SR" pintype="no_connect"/>
+    </net>
+    <net code="73" name="unconnected-(X2-SR-Pad9)">
+      <node ref="X2" pin="9" pinfunction="SR" pintype="no_connect"/>
+    </net>
+  </nets>
+</export>

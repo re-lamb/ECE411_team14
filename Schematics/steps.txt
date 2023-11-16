@@ -1,0 +1,211 @@
+kicad is still infuriating.
+
+to set up with the custom gameman (adafruit) symbols and footprints:
+
+1. open up the project in Kicad 7.
+
+2. go to Preferences->Manage Symbol Libraries.
+
+3. under the Project Specific Libraries tab, check/add a nickname called GameMan
+	Library path: ${KIPRJMOD}/GameMan.kicad_sym
+	Format: KiCad
+	Options can be blank
+	Description (optional): GameMan project custom symbols
+
+	make sure that the Path Substitutions (bottom pane) has a
+	definition for KIPRJMOD with the path to the top-level GameMan
+	directory, wherever that is on your system
+
+4. OK to save any changes and close the Symbol Libraries window.
+
+5. at the main window, go to Preferences->Manage Footprint Libraries
+
+6. check the Project Specific Libraries tab for the same basic info:
+	Nickname: GameMan
+	Library Path: ${KIPRJMOD}/GameMan.pretty
+	Format: KiCad
+	Options can be blank
+	Description (optional): GameMan project footprints
+
+	KIPRJMOD should be defined in the Path Substitutions pane here too.
+
+7. OK to save changes and close the Footprint Libraries window.
+
+
+--------
+update 3
+--------
+
+standardized the buttons to a common 6mm size, fixed up routing/layout to accommodate them.  added some
+text to label the extra i/o pins, etc.  this version might never get built but it's pretty clean.
+
+software!  working on some test programs and building the framework for a menu/game loader.  found a super
+simple networking library unique to the esp32 that has an extremely simple api and doesn't require a metric
+asston of setup AND can do multiple hosts/pseudo broadcasts to dramatically simplify the netcode.  i hope.
+
+--------
+update 2
+--------
+
+added a simple power switch to the enable line on the power controller (as suggested by the datasheet).
+i think this means you can plug in and charge the battery but leave the ucontroller turned off.  need to
+check this more carefully.
+
+mostly cosmetic cleanups.  updated the buttons/placement to use reasonable size devices that will work
+with stems/caps (a/b/c) and a printed d-pad cover.  between adafruit's poor choices and kicad's absolute
+crap library this still isn't right; the symbols/footprints/3d models don't line up.  total garbage.
+
+fixed the paper size, updated to rev a3 to reflect latest tweaks.
+
+--------
+update 1
+--------
+
+the adafruit usb connector does not apparently have a fucking part number even though it seems to be
+absolutely everywhere.  the footprint is just insanely stupid.  i have replaced it with an amphenol
+part (10118194, with a pdf in Docs and an accurate 3d model) but what really needs to be included is
+one with a long snoot that can reach to the edge of a printed enclosure.
+
+the a/b/c buttons are temped in with some common omron types that have stems and can have colorful
+caps popped on.  these are too big for the tiny symbol used on the featherboard for the teeny microswitch;
+an updated 6mm x 6mm symbol and footprint are needed with some trace rerouting to accommodate them.  the
+beefier 12mm x 12mm x 12mm switches would be pretty huge in this layout.
+
+to do an a/b/x/y thing instead we just grab an unused gpio line and drop it in.
+
+the 3d models are the kicad equivalent of 0805 and 0306 but who knows if they're right?  they look small
+compared to the pads, but the extra room would be nice for hand soldering.
+
+this version passes drc.  there are unheeded warnings about text/graphic sizes, whereby the DEFAULTS are
+throwing tons of complaints about not meeting minimum height/thickness requirements.  kicad just gets
+more annoying and stupid with every release, not less.
+
+changes to a bunch of symbols and footprints to fix adafruit bugs/stupidity.  some footprint pads need
+to be manually assigned to the gnd net (usb conn) and some clearances/net widths were narrowed (qfn pkg)
+to meet drc; the defaults given the tiny smt parts used are much too roomy (more suitable for thruhole).
+
+
+=====
+notes
+=====
+
+esp32-wroom-32e module
+----------------------
+
+this is the basis of the adafruit huzzah 32 feather board.  the eagle cad import into kicad
+was less than satisfactory, so rebuilt it from scratch in kicad from these sources:
+
+downloaded current espressif kicad library from:
+https://github.com/espressif/kicad-libraries/releases/download/2.0.4/espressif-kicad-addon.zip
+
+using the design guide:
+https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf
+
+in kicad 7 (latest stable download) used the package manager to install the .zip
+espressif stuff shows up in the library PCM_Espressif
+updated their barebones template example with the PCM_Espressif:ESP32-WROOM-E symbol
+
+manually updated the 3d symbol from the espressif github 3d library:
+https://github.com/espressif/kicad-libraries/blob/templates/3d/ESP32-WROOM-32E.STEP (.wrl)
+
+OF COURSE the template they provide is outdated so updating the symbols and layout to the
+current 2.0.4 version required manual adjustment.  this provides the basic ESP32 module
+with the integrated antenna.
+
+they don't provide a complete bom, of course.  so all the birdseed and other parts req'd:
+
+ref	val		footprint		notes
+C1	10uF		0805-NOOUT		ceramic
+C2	10uF		0805-NOOUT		ceramic
+C6	10uF		0805-NOOUT		ceramic
+C4	1uF		0603-NOOUT		ceramic
+C7	1uF		0603-NOOUT		ceramic
+C8	10uF		0805-NOOUT		ceramic
+D3	RED		CHIPLED_0805_NOOUTLINE	on pin io13/a12
+D4	MBR120		SOD-123			diode schottky	Source: http://www.diodes.com/datasheets/ds30139.pdf
+Q1	mmbt2222	SOT23-3			TRANSISTOR_NPN
+Q2	mmbt2222	SOT23-3			TRANSISTOR_NPN (flipped on schematic)
+Q3	DMG3415U	SOT23-R			MOSFET-P
+R1	100k		0603-NOOUT
+R2	1k		0603-NOOUT
+R3	100k		0603-NOOUT
+R7	100k		0603-NOOUT
+R10	1k		0603-NOOUT
+R12	100k		0603-NOOUT
+R13	10k		RESPACK_4X0603		resistor pack (unit b, c, d)
+SW2	KMR2		BTN_KMR2_4.6X2.8	SWITCH_TACT_SMT4.6X2.8
+X1	JSTPH		CON_JST_PH_2PIN		gnd on pin 1, vbat on pin 2
+X4	20329		4UCONN_20329_V2		USB_MICRO_20329_V2 (part #?)
+CHG0	ORANGE		CHIPLED_0805_NOOUTLINE	LED0805_NOOUTLINE (CHG0? not Dn?)
+IC1	CP2104		QFN24_4MM_SMSC		rename to U1 ffs.  has a part b thermal pad
+
+JP1 and JP3 are the headers for the feather module; not used on our board but maybe bring
+out to exposed pads for debugging/bodges?
+
+ALL of those designators have changed; have to do a new BOM
+
+----
+
+stemma qt display module
+
+
+no kicad footprint found, so again the eagle versions obtained and converted:
+https://github.com/adafruit/Adafruit-Grayscale-1.5-inch-128x128-OLED-PCB/tree/main  (.sch and .brd files)
+
+a 3d model was found:
+https://github.com/adafruit/Adafruit_CAD_Parts/blob/main/4741%20OLED%201.5in/4741%201.5-inch%20OLED.step
+
+	(to align with the eagle->kicad .brd file, set Y rotation to 180, and offset
+	 X +705 mil, Y -732.5 mil, Z -2 mil;  add a standard 2.54mm 1x8 vertical pin
+	 header at rotation -180 Y, -90 Z with offsets -345/+815/-72.5 mils)
+
+NOTE that the eagle board was designed facing screen side DOWN, so it has to be flipped to be incorporated
+into the gameman.  four mounting holes plus the 1x8 header have to align but the symbol and footprint only
+have to show the interface, not the details of the entire stemma qt module.
+
+module dimensions are 35.56mm wide, 46.99mm high, with holes centered at 30.48mm wide, 41.91mm high
+there's a 5.08mm offset to the screen edge from the top.  the two tabs for the lower/bottom holes are
+approximately the same distance/width for vertical (physical) clearance (though we won't put anything
+there anyway).  the serial connectors require that the module be lifted with standoffs, but no more
+than a standard pin header's height.  button + cap heights to be determined after a proper 3d render/
+drawing can be made for sizing the case thickness
+
+mounting holes are 3.2mm pad, 2.5mm hole; solder mask expansion set to 0.0508mm (custom?)
+header holes are 1.778mm pad, 1mm hole; same mask exp value (eagle import artifact?)
+
+pinout (L-R from top/front):		Connect to:
+	1-SDA		Data		pin 30-GPIO18 (MOSI)
+	2-SCL		Clk		pin 29-GPIO5 (SCK)
+	3-SA0_5.0V	A0 DC		pin 27-GPIO16
+	4-RST_5.0V	Rst		pin 33-GPIO21
+	5-CS_5.0V	CS		pin 28-GPIO17
+	6-3.3V		3Vo		NC
+	7-VCC		VIN		+3.3V
+	8-GND		GND		GND
+
+arduino programming support is at https://github.com/adafruit/Adafruit_SSD1327
+
+#include <Adafruit_SSD1327.h>
+
+// Used for software SPI
+#define OLED_CLK 13		--> 5
+#define OLED_MOSI 11		--> 18
+
+// Used for software or hardware SPI
+#define OLED_CS 10		--> 17
+#define OLED_DC 8		--> 16
+
+// Used for I2C or SPI
+#define OLED_RESET -1		--> 21
+
+// software SPI
+//Adafruit_SSD1327 display(128, 128, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+// hardware SPI
+//Adafruit_SSD1327 display(128, 128, &SPI, OLED_DC, OLED_RESET, OLED_CS);
+
+----
+
+test unit 1 (with ssd1327 gray oled display):  MAC Address: 24:4C:AB:2E:26:00
+test unit 2 (no display): MAC Address: 70:B8:F6:84:62:64
+
+TaskManagerIO package

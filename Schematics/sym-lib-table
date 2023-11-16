@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "GameMan")(type "KiCad")(uri "${KIPRJMOD}/GameMan.kicad_sym")(options "")(descr "GameMan project custom symbols"))
+)
