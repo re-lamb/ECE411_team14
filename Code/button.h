@@ -32,11 +32,6 @@
 
 enum buttAction : byte { btnPressed, btnRepeat, btnReleased };
 
-/*
-const byte btnPressed = 0x1;
-const byte btnRepeat = 0x2;
-const byte btnReleased = 0x4;
-*/
 typedef struct buttState {
   byte id;                      // bit id in status word
   byte pin;                     // pin number

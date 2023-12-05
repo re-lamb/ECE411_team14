@@ -38,11 +38,9 @@ void GMTask::start() {
   } else {
     Serial.printf("Task %s starting!\n", _taskName);
     _taskComplete = false;
-    //_taskData = taskData;
+    
     xTaskCreatePinnedToCore(this->runTask, _taskName, _stackSize, this, _priority, &_taskHandle, _coreId);
   }
-
-  //return _taskHandle;
 }
 
 void GMTask::stop() {

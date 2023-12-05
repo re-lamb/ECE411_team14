@@ -23,15 +23,20 @@ void AboutBox::setup() {
 }
 
 void AboutBox::showAboutBox() {
+
+  String buf = "Version " + String(GM_VERSION);
+  int16_t y = display.height() / 2;
+
   display.clearDisplay();
   display.setFont();
   display.setTextSize(2);
   display.setTextColor(SSD1327_WHITE);
-  display.setCursor(0, 40);
-  display.println("GameMan!");
+  display.setCursor(getCenterX("GameMan!"), y - 30);
+  display.print("GameMan!");
 
   display.setTextSize(1);
-  display.println("Version " + String(GM_VERSION));
+  display.setCursor(getCenterX(buf.c_str()), y - 10);
+  display.print(buf);
   display.display();
 }
 
@@ -44,6 +49,7 @@ void AboutBox::showAboutBox() {
  */
 void AboutBox::run() {
 
+  const char *msg = "Press any button";
   bool blinkOn = false;
   button_event_t press;
 
@@ -51,12 +57,15 @@ void AboutBox::run() {
 
   showAboutBox();
 
+  display.setTextSize(1);
+  int16_t x = getCenterX(msg);
+
   while (!xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
 
     blinkOn = !blinkOn;
-    display.setCursor(0, display.height() - 10);
+    display.setCursor(x, display.height() - 10);
     display.setTextColor(blinkOn ? SSD1327_WHITE : SSD1327_BLACK);
-    display.print("Press any button");
+    display.print(msg);
     display.display();
 
     delay(500);

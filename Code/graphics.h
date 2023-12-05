@@ -20,6 +20,7 @@
 #define SPLASH_LG   128
 
 #define HALF_BRIGHT 0x07    // should be a medium gray?
+#define DARK_GRAY   0x03    // about 3/4 dark?  season to taste
 
 // "About" menu icon
 // array size is 32

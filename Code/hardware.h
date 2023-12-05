@@ -3,7 +3,7 @@
  *
  *  Abstract:
  *      Defines the mapping of IO pins to the hardware as laid down
- *      on the GameMan PCB rev A3.
+ *      on the GameMan PCB rev B1.
  *
  *  Team 14 Project
  *  Portland State University

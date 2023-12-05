@@ -61,7 +61,8 @@ void MenuTask::redrawMenu() {
   int16_t x1, y1;
   uint16_t w, h;
 
-  Serial.println("Entering redraw");
+  Serial.println("menu: Entering redraw");
+
   /*
    *  Format of the main menu:
    *    +----------------+    3 pixel border
@@ -79,12 +80,13 @@ void MenuTask::redrawMenu() {
    */
 
   display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1327_WHITE);
   display.fillRect(0, 0, display.width(), display.height(), HALF_BRIGHT);
   display.drawRect(1, 1, display.width() - 2, display.height() - 2, SSD1327_BLACK);  // fixme
 
   // Set a nice menu font, then compute its height, center the header
   display.setFont(&FreeSans9pt7b);
-  display.setTextColor(SSD1327_WHITE);  // fixme
   display.getTextBounds(MENU_HEADER, 0, 0, &x1, &y1, &w, &h);
 
   // Save/compute based on the font loaded
@@ -132,10 +134,10 @@ void MenuTask::redrawMenu() {
  */
 void MenuTask::showSelected(bool on) {
 
-  Serial.printf("showSelected called for menu item %d\n", selected);
+  // Serial.printf("menu: showSelected called for item %d\n", selected);
 
   if (selected < 0 || selected >= MENU_MAX_ITEMS) {
-    Serial.println("HOW?  WTF?");
+    Serial.println("menu: selection out of range!");
     return;
   }
 
@@ -181,27 +183,27 @@ void MenuTask::run() {
       // We're in the foreground, so grab button events
       if (xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
 
-        // For now we're only interested in release (button up) events
-        if (press.action == btnReleased) {
+        if (press.action == btnReleased || press.action == btnRepeat) {
 
           // Got one! De-highlight the current selection...
           showSelected(false);
 
           switch (press.id) {
             case BTN_UP:
-            case BTN_A:
               selected += (selected > 0) ? -1 : 0;
               break;
 
             case BTN_DN:
-            case BTN_B:
               selected += (selected < MENU_NUM_ITEMS) ? 1 : 0;
               break;
 
-            case BTN_C:
-              Serial.printf("Selected item %d!\n", selected);
-              if (items[selected].prog != NULL)
-                appRunning = true;
+            case BTN_B:
+              // button B is "yes"/doit -- ignore repeats
+              if (press.action != btnRepeat) {
+                Serial.printf("Selected item %d!\n", selected);
+                if (items[selected].prog != NULL)
+                  appRunning = true;
+              }
               break;
           }
 

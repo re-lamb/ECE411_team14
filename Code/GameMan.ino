@@ -18,16 +18,14 @@
  */
 
 #include <Arduino.h>
-#include <Preferences.h>
 #include <Adafruit_SSD1327.h>
-#include <WiFi.h>
-#include <esp_now.h>
 
 #include "hardware.h"
 #include "graphics.h"
 #include "task.h"
 #include "button.h"
 #include "menu.h"
+#include "network.h"
 #include "about.h"
 
 /*
@@ -40,36 +38,36 @@ Adafruit_SSD1327 display(128, 128, OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLE
 // Create the main menu / button task
 MenuTask menuTask;
 ButtonTask buttonTask;
+NetworkTask netTask;
 
 QueueHandle_t buttonEvents;
 
-void showBattery() {
-  uint8_t pct = 100;
-  float voltage = analogRead(VBAT_SENSE) / 4096.0 * 7.23;  // ESP32-WROOM-32E with voltage divider
-
-  Serial.println("Battery sense: " + String(voltage));
-
-  // Polynomial courtesy of github.com/G6EJD/LiPo_Battery_Capacity
-  pct = 2808.3808 * pow(voltage, 4) - 43560.9157 * pow(voltage, 3) + 252848.5888 * pow(voltage, 2) - 650767.4615 * voltage + 626532.5703;
-
-  if (voltage > 4.19) pct = 100;
-  else if (voltage <= 3.50) pct = 0;
-
-  Serial.println("Battery avail: " + String(pct) + "%");
-}
-
-// Courtesy of Espressif: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos_idf.html#misc
 void showTasks() {
 
-  //char writeBuf[1280];    // estimated 32 tasks * 40 bytes
-  //vTaskList(writeBuf);    // not available in standard arduino esp-idf build? :-(
-  //Serial.println(writeBuf);
+  // Courtesy of Espressif: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos_idf.html#misc
+  //char writeBuf[1280];      // estimated 32 tasks * 40 bytes
+  //vTaskList(writeBuf);      // not available in standard arduino esp-idf build?
+  //Serial.println(writeBuf); // so it doesn't work. :-(
 
   Serial.printf("System says %d tasks are present\n", uxTaskGetNumberOfTasks());
 }
 
 /*
- * Show a silly slash screen once at startup.
+ *  Utility routine that probably ought to be in a graphics library.
+ *  Return the X coordinate to display a string centered on the screen
+ *  using the current font and size.
+ */
+int16_t getCenterX(const char *s) {
+  int16_t x, y;
+  uint16_t w, h;
+
+  display.getTextBounds(s, 0, 0, &x, &y, &w, &h);
+
+  return ((display.width() - w) / 2);
+}
+
+/*
+ *  Show a silly slash screen once at startup.
  */
 void showSplash() {
   /*
@@ -98,11 +96,6 @@ void showSplash() {
       logo = bitmaps[i / 16];
 
       display.clearDisplay();
-
-      Serial.print("Logo: ");
-      Serial.print(cur_sz);
-      Serial.print(" step: ");
-      Serial.println(i);
     }
 
     // the 1.5" oled is a square... assume 0..127 addressible?
@@ -114,8 +107,56 @@ void showSplash() {
     delay(dly);
   }
 
-  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(DARK_GRAY);
+  display.setCursor(getCenterX("Initializing..."), display.height() - 10);
+  display.print("Initializing...");
   display.display();
+  delay(1000);
+}
+
+/*
+ *  Fade the splash screen and welcome the user before transition
+ *  to the menu loop.  Give it a little snazz.
+ */
+void fadeSplash() {
+
+  uint8_t bmpColor = SSD1327_WHITE;
+  uint8_t txtColor = SSD1327_BLACK;
+  uint8_t x1, x2, y;
+
+  const int dly = 50;
+
+  display.setTextSize(2);
+  x1 = getCenterX("Welcome");
+  x2 = getCenterX(netTask.getPlayerName());
+  y = display.height() / 2;
+
+  // Lot of hardcodey bits here, it's just a one off.
+  for (int i = 0; i < 24; i++) {
+    display.clearDisplay();
+
+    if (i < 16) {
+      // Fade out the bitmap
+      display.drawBitmap(0, 0, maze128_bmp, 128, 128, bmpColor--);
+    }
+
+    if (i >= 8) {
+      // Fade in the welcome message
+      display.setTextColor(txtColor++);
+      display.setCursor(x1, y - 20);
+      display.print("Welcome");
+      display.setCursor(x2, y);
+      display.print(netTask.getPlayerName());
+      display.display();
+    }
+
+    delay(dly);
+  }
+
+  // Let the welcome message linger for a sec; menu will clear it
+  // when the rest of the initialization is done
+  delay(1000);
 }
 
 /*
@@ -125,14 +166,10 @@ void setup() {
 
   char debugData[32];
 
-  // Setup Serial Monitor
+  // Setup serial port and announce ourselves
   Serial.begin(115200);
   delay(100);
-
   Serial.println("GameMan v" + String(GM_VERSION) + " initializing");
-
-  // Initialize the button(s)
-  buttonTask.setup();
 
   // Initialize and clear the display
   if (!display.begin(0x3D)) {
@@ -142,40 +179,38 @@ void setup() {
 
   display.clearDisplay();
   display.display();
+  delay(100);
 
-  // Put ESP32 into Station mode
-  WiFi.mode(WIFI_MODE_STA);
-
-  // Print MAC Address to Serial monitor
-  Serial.print("MAC Address: ");
-  Serial.println(WiFi.macAddress());
-
-  // Init the network stack
-  if (esp_now_init() != ESP_OK) {
-    Serial.println("Unable to initialize ESP NOW");
-    while (1) yield();
-  } else {
-    Serial.println("ESP NOW initialized");
-  }
-
-  showBattery();
-
+  // Show the splash screen
   showSplash();
+
+  // Initialize the button(s)
+  buttonTask.setup();
+
+  // Set up the network/player info
+  netTask.setup();
 
   // Build the menu
   menuTask.setup();
 
   // Create the event queues
-  buttonEvents = xQueueCreate(10, sizeof (button_event_t));
+  buttonEvents = xQueueCreate(10, sizeof(button_event_t));
   if (buttonEvents == 0) {
     Serial.println("ERROR: could not create button event queue?");
   }
+
+  // Fade the splash and show the welcome message
+  fadeSplash();
+
+  // debug
+  showTasks();
   
   // Start up the background tasks
+  netTask.start();
   buttonTask.start();
   menuTask.start();
 
-  vTaskDelay(1000);  // wait a sec
+  // debug
   showTasks();
 }
 

@@ -82,3 +82,49 @@ API
 ---
 
 TBD.
+
+The "SysInfo" app (or maybe AboutBox?) lets the user customize their
+unit by entering a name or tag through the keypad.  This tag is then
+associated with their GM's MAC address and included in IFF broadcasts
+so that players can identify each other easily.  The tag is kept in
+the ESP32's non-volatile RAM area using the Preferences functions.
+
+Network design
+--------------
+
+Incoming network packets are filtered by the network task and only GM-
+specific ones are handed off to the incoming packet queue.  This helps
+simplify the event loop for applications, since any protocol the games
+use can be kept separate from "housekeeping" functions.  Each task can
+register a filter for which kinds of packets it is able to handle, so
+any that aren't recognized are just ignored.
+
+When first switched on, and every 'n' seconds later the GM transmits an
+IFF packet.  This is broadcast to alert any other units in the vicinity
+that a new player has entered range.  The network task itself handles
+these broadcasts and keeps a list of active players.
+
+    Packet type(s) handled:  IFF
+
+The menu task can show the current list of known associates and if
+they are active and in range, their current status.
+
+Having the host/join/accept/reject stuff be common eliminates duplicate
+code, since those can be set up like function calls
+  if (networkTask.invite(player, this->taskName) == IFF_ACCEPT) {
+    /* go into host mode and start the game loop */
+  }
+
+
+Preferences
+-----------
+
+Player name or tag is n chars (8-12?) long and kept in Preferences
+(nvram), set by the Sys Info app (or Settings, whatever we call it)
+
+Other personalizations can be saved too (up to 512 bytes?) which is
+a nice touch
+
+
+
+
