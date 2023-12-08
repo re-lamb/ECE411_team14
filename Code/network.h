@@ -109,20 +109,20 @@ class NetworkTask : public GMTask {
     int addFilter(int qId, uint8_t code);
     int dropFilter(int qId, uint8_t code);
 
-    int sendAll(gm_packet_t pkt);
-    int sendTo(gm_player_t player, gm_packet_t pkt);
+    int sendPkt(gm_packet_t *pkt);
 
     void sendRSVP(const char *appRequest, uint8_t replyTo);
 
     const uint8_t broadcast[ADDR_LEN] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     static const char *fmtMAC(const uint8_t *mac);
     
-    String getNodeAddr();
 
     // Player stuff
     String getPlayerName();
+    String getNodeAddr();
     void setPlayerName(char *name);
     int findPlayer(char *name);
+    gm_player_t *getPlayer(int id);
 
   private:
     void run() override;

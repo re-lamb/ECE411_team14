@@ -78,8 +78,9 @@ private:
   void drawHighlight(uint8_t x, uint8_t y, bool on);
   void trackCursor(uint8_t dir);
   bool claimSquare(bool host);
+  void sendTTT(const uint8_t *mac, uint8_t code, uint8_t seq);
   void sendUpdate();
-  void recvUpdate();
+  Condition recvUpdate();
   Condition updateCondition();
   bool askToPlayAgain();
   void showSignOff();
@@ -90,9 +91,11 @@ private:
 
   // Player X is the host, player O is the guest
   bool hosting;
-  String us;
-  String them;
-  String msg;
+  gm_player_t *me;
+  gm_player_t *them;
+  String p1label;
+  String p2label;
+  String statusMsg;
 
   // The simple playing field
   Square board[3][3];

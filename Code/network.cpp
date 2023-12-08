@@ -26,7 +26,7 @@
 #define VALID(x) (x >= 0 && x < MAX_CLIENTS && clients[x].inUse)
 
 NetworkTask::NetworkTask()
-  : GMTask("NET") {  // , 8192, 2, PRO_CPU_NUM) {
+  : GMTask("NET", 8192, 2, PRO_CPU_NUM) {
 
   // Maybe not required, but good practice?
   initialized = false;
@@ -227,30 +227,15 @@ int NetworkTask::dropFilter(int qId, uint8_t code) {
 /*
  *  Send a network broadcast packet.
  */
-int NetworkTask::sendAll(gm_packet_t pkt) {
+int NetworkTask::sendPkt(gm_packet_t *pkt) {
 
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcast, (uint8_t *)&pkt, sizeof(gm_packet_t));
+  esp_err_t result = esp_now_send(pkt->dstAddr, (uint8_t *)pkt, sizeof(gm_packet_t));
 
-  dprintf("net: Sent broadcast (type %d)\n", pkt.pktType);
+  dprintf("net: Sent to %s (type %d)\n", fmtMAC(pkt->dstAddr), pkt->pktType);
   sendAccounting(result);
   return result;
 }
-
-/*
- *  Send a network packet to a specific player.
- */
-int NetworkTask::sendTo(gm_player_t player, gm_packet_t pkt) {
-
-  // todo: if the player isn't a peer, add them, then send
-  esp_err_t result = esp_now_send(player.node, (uint8_t *)&pkt, sizeof(gm_packet_t));
-
-  dprintf("net: Sent to %s (type %d)\n", player.tag, pkt.pktType);
-  sendAccounting(result);
-  return result;
-}
-
-// todo: group send (for multiplayer) just uses NULL as the address; useful for mazewar!
 
 /*
  *  For debugging, check/print error code and count stats.
@@ -291,7 +276,7 @@ void NetworkTask::recvCallback(const uint8_t *mac_addr, const uint8_t *data, int
 
   memcpy(&pkt, data, data_len);
 
-  if (xQueueSend(incoming, &(pkt), (TickType_t)0) != pdTRUE) {
+  if (xQueueSend(incoming, (void *)&pkt, (TickType_t)0) != pdTRUE) {
     Serial.println("net: Incoming queue full, packet dropped!");
     pktStats[pktRecvOverflow]++;
   } else {
@@ -325,7 +310,7 @@ void NetworkTask::dispatch() {
           // dprintf("match filter %d! ", f);
           if (clients[q].handle) {
             // dprintln("handle is good, about to queue:");
-            if (xQueueSendToBack(clients[q].handle, &(pkt), (TickType_t)0) == pdTRUE) {
+            if (xQueueSend(clients[q].handle, (void *)&pkt, (TickType_t)0) == pdTRUE) {
               dprintf("Sent to client %d\n", q);
               pktStats[pktDispatched]++;
               clients[q].numReceived++;
@@ -372,7 +357,7 @@ void NetworkTask::sendIFF(uint8_t code) {
   memcpy(pkt.payload, &hello, pkt.length);
 
   // Ship it!
-  sendAll(pkt);
+  sendPkt(&pkt);
 }
 
 /*
@@ -401,7 +386,7 @@ void NetworkTask::sendRSVP(const char *appRequest, uint8_t replyTo) {
   memcpy(pkt.payload, &rsvp, pkt.length);
 
   // Send it
-  sendAll(pkt);
+  sendPkt(&pkt);
 }
 
 /*
@@ -448,7 +433,7 @@ void NetworkTask::receiveIFF(QueueHandle_t q) {
       // Same as dispatch(), but bypassing filters; make sure the
       // queue still exists, since they may have gone away
       if (VALID(iff.reqId)) {
-        if (xQueueSendToBack(clients[iff.reqId].handle, &(pkt), (TickType_t)0) == pdTRUE) {
+        if (xQueueSend(clients[iff.reqId].handle, (void *)&pkt, (TickType_t)0) == pdTRUE) {
           dprintf("net: Dispatched to client %d\n", iff.reqId);
           pktStats[pktDispatched]++;
           clients[iff.reqId].numReceived++;
@@ -515,6 +500,12 @@ int NetworkTask::findPlayer(char *name) {
   return -1;  // nope
 }
 
+gm_player_t *NetworkTask::getPlayer(int id) {
+  if (id >= 0 && id < MAX_PLAYERS) {
+    return &players[id];
+  }
+  return NULL;
+}
 /*
  *  Add a new network player if there's room.  Otherwise, flail.
  */

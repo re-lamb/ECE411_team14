@@ -88,6 +88,10 @@ bool MenuTask::startNetwork() {
 
   // Now grab our actual handle for reading packets!
   rsvpQ = netTask.getHandle(rsvpId);
+  if (rsvpQ == 0) {
+    Serial.println("menu: Invalid RSVP queue handle!");
+    return false;
+  }
 
   return true;
 }
@@ -229,8 +233,11 @@ void MenuTask::run() {
 
     if (!appRunning) {
 
+      // Humans are slow, so tune this here for ~ 25-50ms between polls
+      delay(50);
+
       // We're in the foreground, so grab button events
-      if (xQueueReceive(buttonEvents, &(press), (TickType_t)25)) {
+      if (xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
 
         if (press.action == btnReleased || press.action == btnRepeat) {
 
@@ -267,7 +274,7 @@ void MenuTask::run() {
         gm_packet_t pkt;
         iff_packet_t rsvp;
 
-        if (xQueueReceive(rsvpQ, &(pkt), (TickType_t)25)) {
+        if (xQueueReceive(rsvpQ, &(pkt), (TickType_t)0)) {
           Serial.println("menu: Received RSVP packet");
 
           // Sanity check...

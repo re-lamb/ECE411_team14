@@ -34,6 +34,7 @@ void TicTacToe::setup(bool rsvp) {
 
   hosting = !rsvp;   // if launched by RSVP, we're the guest
   myTurn = hosting;  // player X goes first
+  seqNum = 0;        // unsynchronized
 
   // Clear the board and precompute the text offsets
   for (int x = 0; x < 3; x++) {
@@ -153,80 +154,30 @@ void TicTacToe::showSignOff() {
  *  Returns false if no other player connects or the user quits.
  */
 bool TicTacToe::hostOrJoin() {
-
-  gm_packet_t response;
-  iff_packet_t responder;
   button_event_t press;
 
-  bool waiting = true;
-  int retries = 0;
-  int dot = xTaskGetTickCount() - 5000;
+  // A hack until RSVP works :-(
+  display.println("Press A to host");
+  display.println("Press B to join");
+  display.println("Press C for menu");
+  display.display();
 
-  if (hosting) {
+  for (;;) {
 
-    Serial.println("TicTacToe: Starting as host");
-
-    display.println("Waiting for another");
-    display.println(" player to join...");
-    display.display();
-
-    delay(1000);
-    return true;
-
-    // network still broken
-
-    while (waiting && retries < 3) {
-
-      if (elapsed(5000, dot)) {
-        display.print(".");
-        display.display();
-        dot = xTaskGetTickCount();
-
-        // Broadcast it
-        netTask.sendRSVP("TicTacToe", netId);
-        retries++;
-      }
-
-      // Pressing the C/home button just quits to the menu
-      if (xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
-        if (press.id == BTN_C && press.action == btnReleased) {
-          display.println();
-          display.println("Quitting");
+    if (xQueueReceive(buttonEvents, &(press), (TickType_t)1000)) {
+      if (press.action == btnReleased) {
+        if (press.id == BTN_A) {
+          hosting = true;
+          return true;
+        } else if (press.id == BTN_B) {
+          hosting = false;
+          return true;
+        } else if (press.id == BTN_C) {
           return false;
         }
       }
-
-      // Wait for an IFF_ACCEPT...
-      if (xQueueReceive(netQ, &(response), (TickType_t)50)) {
-        if (response.pktType == GM_IFF) {
-
-          dprintln("UNPACK IFF PAYLOAD");
-          // Pull out the IFF payload
-          memcpy(&responder, response.payload, response.length);
-          if (responder.type == IFF_ACCEPT) {
-            dprintf("%s wants to play!\n", responder.who);
-            // verify the player is known, etc
-            waiting = false;
-          } else if (responder.type == IFF_REJECT) {
-            dprintf("%s won't play with me!\n", responder.who);
-          }
-        } else {
-          dprintf("Disregarding type %d packet\n", response.pktType);
-        }
-      }
     }
-  } else {
-    // Guest: wait for sync packet to start game as player O
-    Serial.println("TicTacToe: Starting as guest");
-
-    display.println("Waiting for the");
-    display.println("host to begin...");
-    display.display();
-
-    delay(1000);
-
   }
-  return true;
 }
 
 /*
@@ -244,9 +195,9 @@ void TicTacToe::resetBoard() {
   curOn = true;
 
   // Set the message strings
-  us = String(hosting ? ": X" : ": O") + netTask.getPlayerName();
-  them = String(hosting ? ": O" : ": X") + String("[Player 2]");
-  msg = String("Ready!");
+  p1label = String(hosting ? "X : " : "O : ") + String(me->tag);
+  p2label = String(hosting ? "O : " : "X : ") + String(them != NULL ? them->tag : "[Player 2]");
+  statusMsg = String("Ready!");
 }
 
 /*
@@ -289,9 +240,9 @@ void TicTacToe::drawScreen() {
   }
 
   // Draw the text fields
-  drawMessage(Player1, us);
-  drawMessage(Player2, them);
-  drawMessage(Status, msg);
+  drawMessage(Player1, p1label);
+  drawMessage(Player2, p2label);
+  drawMessage(Status, statusMsg);
 }
 
 /*
@@ -461,9 +412,35 @@ Condition TicTacToe::updateCondition() {
 
 bool TicTacToe::askToPlayAgain() {
 
-  msg = String("Play again?");
+  drawMessage(Status, "Play again?");
   delay(1000);
   return true;
+}
+
+/*
+ *  Format and send a TicTacToe packet.
+ */
+void TicTacToe::sendTTT(const uint8_t *mac, uint8_t code, uint8_t seq) {
+  gm_packet_t pkt;
+  ttt_packet_t ttt;
+
+  // Fill in the payload
+  ttt.type = code;
+  ttt.sequence = seq;
+  ttt.which = hosting ? 'x' : 'o';
+  ttt.x = curX;
+  ttt.y = curY;
+  memcpy(ttt.who, me->tag, GM_PLAYER_TAG_LEN);
+
+  // Fill in the GM wrapper
+  pkt.pktType = GM_TICTAC;
+  memcpy(pkt.dstAddr, mac, ADDR_LEN);
+  memcpy(pkt.srcAddr, me->node, ADDR_LEN);
+  pkt.length = sizeof(ttt_packet_t);
+  memcpy(pkt.payload, &ttt, pkt.length);
+
+  // Ship it!
+  netTask.sendPkt(&pkt);
 }
 
 /*
@@ -472,23 +449,39 @@ bool TicTacToe::askToPlayAgain() {
  */
 void TicTacToe::sendUpdate() {
 
+  // broken networking
+  return;
+
+  // dprintf("ttt: sendUpdate state %d, seq %d, host %c, turn %c\n", state, seqNum, hosting ? 'T' : 'F', myTurn ? 'T' : 'F');
+
   switch (state) {
 
     case Reset:
       /*
-      when our state is Reset, we send a Sync packet
-      with sequence # 0.  This tells the other side
-      we're ready to go.  They init their screen and
-      return the Sync.  We then shift to Undecided and
-      trust they have done the same
-      */
+       *  If unsynchronized and we're the host, send a Sync with seq #1
+       *  and set up to be player X.  Tells the other to assume player O.
+       *  Wait for their ack to begin.  There should be a timeout/retry
+       *  here in case they miss the initial packet...
+       */
+      if (seqNum == 0) {
+        if (hosting) {
+          drawMessage(Status, "Sending SYNC", WHITE);
+          seqNum = 1;
+          sendTTT(netTask.broadcast, TTT_SYNC, seqNum);
+        } else {
+          drawMessage(Status, "Wait for SYNC", WHITE);
+        }
+      } else if (seqNum == 1) {
+        // ready to transition to game mode
+        drawMessage(Status, "Ready!");
+        state = Undecided;
+      }
       break;
 
     case Undecided:
       /*
-        send the curx, cury.  the other side should
-        have an identical view of the board and compute
-        the same win condition.
+        Here we send PLAY packets when a move has been made, then swap
+        turns.  Bump the sequence number.
       */
       myTurn = !myTurn;
       break;
@@ -509,7 +502,60 @@ void TicTacToe::sendUpdate() {
   }
 }
 
-void TicTacToe::recvUpdate() {
+Condition TicTacToe::recvUpdate() {
+  gm_packet_t pkt;
+  ttt_packet_t ttt;
+
+  // No net?  Fail.
+  if (netQ == 0) return Quit;
+
+  // dprintf("ttt: recvUpdate state %d, seq %d, host %c, turn %c\n", state, seqNum, hosting ? 'T' : 'F', myTurn ? 'T' : 'F');
+
+  // Look for a GM_TICTAC and ignore any IFF stuff for now :-(
+  if (xQueueReceive(netQ, &(pkt), (TickType_t)0)) {
+    if (pkt.pktType == GM_TICTAC && pkt.length == sizeof(ttt_packet_t)) {
+
+      memcpy(&ttt, pkt.payload, pkt.length);
+      dprintf("ttt: Received a %c (seq %d) from %s\n", ttt.type, ttt.sequence, ttt.who);
+
+      switch (ttt.type) {
+
+        case TTT_SYNC:
+          if (ttt.sequence == 1 && ttt.which == 'x') {
+            /*
+             *  If this ARRIVES with seq #1, the other side is the host;
+             *  we respond with a 1 and set which to 'o' to let 'em know we
+             *  are resetting and they go first.  We also record them as
+             *  player 2 and transition to Undecided to await their first play.
+             */
+            drawMessage(Status, "SYNC received");
+            hosting = myTurn = false;
+            seqNum = 1;
+            strncpy(them->tag, ttt.who, GM_PLAYER_TAG_LEN);
+            p2label = String(hosting ? "O : " : "X : ") + String(them != NULL ? them->tag : "[Player 2]");
+            drawMessage(Player2, p2label);
+            return Undecided;
+          }
+          break;
+
+        case TTT_PLAY:
+          // their move
+          break;
+
+        case TTT_QUIT:
+          // Other player quit, so wrap it up nicely.
+          return Quit;
+          break;
+
+        default:
+          dprintf("ttt: Type %x not implemented or invalid", ttt.type);
+          break;
+      }
+    }
+  }
+
+  // ack
+  return state;
 }
 
 /*
@@ -523,19 +569,21 @@ void TicTacToe::recvUpdate() {
  *  printed and the game exits to the main menu.
  */
 void TicTacToe::run() {
-
   button_event_t press;
-  bool running = true;
-  Condition state = Reset;
 
   dprintln("TicTacToe: Task starting");
 
-  showGreeting();
+  bool running = true;
+  state = Reset;
+  seqNum = 0;
 
+  showGreeting();
   running = startNetwork();
 
   // Got net? Find someone to play with!
   if (running) {
+    me = netTask.getPlayer(0);  // get our player rec
+    them = NULL;                // until someone joins
     running = hostOrJoin();
   }
 
@@ -547,11 +595,29 @@ void TicTacToe::run() {
       resetBoard();
       drawScreen();
 
+/*
+    [ networking broken / disabled ]
+    
+      // Start the network dance
+      sendUpdate();
+
+      while (state == Reset) {
+
+        delay(25);
+
+        if (xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
+          if (press.action == btnReleased && press.id == BTN_C)
+            state = Quit;
+        }
+
+        recvUpdate();
+      }
+*/
       curOn = true;
       drawHighlight(curX, curY, curOn);
 
       state = Undecided;
-      myTurn = hosting;
+      myTurn = true;      // hosting;   [networking broken/disabled]
       // And fall straight into the main loop
     }
 

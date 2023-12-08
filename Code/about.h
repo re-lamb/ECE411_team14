@@ -14,7 +14,7 @@
 #ifndef _GM_ABOUT_H_
 #define _GM_ABOUT_H_
 
-#define GM_VERSION 0.85
+#define GM_VERSION 0.89
 
 class AboutBox : public GMTask {
   public:
