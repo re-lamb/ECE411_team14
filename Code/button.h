@@ -50,7 +50,7 @@ typedef struct buttEvent {
 class ButtonTask : public GMTask {
   public:
     ButtonTask();
-    void setup() override;
+    void setup(bool rsvp) override;
     
     bool buttonsChanged();
     button_state_t getButtonState(byte button);

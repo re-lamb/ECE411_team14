@@ -17,9 +17,9 @@ ButtonTask::ButtonTask()
   : GMTask("BUTTON") {
 }
 
-void ButtonTask::setup() {
+void ButtonTask::setup(bool rsvp) {
 
-  Serial.println("Button task initializing");
+  Serial.println("button: Task initializing");
 
   // Set the pin modes for each defined button
   pinMode(IO_BTN_A, INPUT_PULLUP);
@@ -38,7 +38,7 @@ void ButtonTask::setup() {
 // Check ALL the buttons and update the flag words
 void ButtonTask::pollButtonState() {
 
-  int now = millis();  // Snapshot the current time -- xGetTimeSinceStart() instead??
+  int now = xTaskGetTickCount();  // Snapshot the current time
 
   lastButt = curButt;
   curButt = 0;
@@ -92,7 +92,7 @@ void ButtonTask::enqueue(buttAction a, byte id) {
  */
 void ButtonTask::queueButtonEvents() {
 
-  int now = millis();  // Snapshot the current time -- or pass it in?
+  int now = xTaskGetTickCount();  // Snapshot the current time -- or pass it in?
 
   /*
    * Transition rules:
@@ -105,23 +105,22 @@ void ButtonTask::queueButtonEvents() {
   for (int i = 0; i < 8; i++) {
 
     if (buttons[i].current != buttons[i].last) {
-      Serial.printf("Button %d ", i);
+      dprintf("button: %d ", i);
 
       if (buttons[i].current == 0) {
-        Serial.println("pressed");
+        dprintln("pressed");
         buttons[i].lastEventTime = now;
         enqueue(btnPressed, buttons[i].id);
       } else {
-        Serial.println("released");
+        dprintln("released");
         buttons[i].lastEventTime = now;
         enqueue(btnReleased, buttons[i].id);
       }
     } else {
       if (buttons[i].current == 0 && buttons[i].timeInState > BTN_REPEAT_DELAY) {
-        int elapsed = now - buttons[i].lastEventTime;
 
-        if (elapsed >= BTN_REPEAT_RATE) {
-          Serial.printf("Button %d repeats! (%d ms)\n", i, elapsed);
+        if (elapsed(BTN_REPEAT_RATE, buttons[i].lastEventTime, now)) {
+          dprintf("button: %d repeats (%d ticks)\n", i, now - buttons[i].lastEventTime);
           buttons[i].lastEventTime = now;
           enqueue(btnRepeat, buttons[i].id);
         }
@@ -140,22 +139,20 @@ void ButtonTask::queueButtonEvents() {
  */
 void ButtonTask::run() {
 
-  Serial.printf("Button task starting up on core %d\n", xPortGetCoreID());
+  Serial.printf("button: Task starting up on core %d\n", xPortGetCoreID());
 
   for (;;) {
 
     pollButtonState();
 
     if (buttonsChanged()) {
-      Serial.printf("Button state: %s at %d\n", String(curButt, BIN), millis());
+      dprintf("button: State %s at %d\n", String(curButt, BIN), xTaskGetTickCount());
 
       // debug
       buttLight = !buttLight;
       digitalWrite(LED_BUILTIN, buttLight ? HIGH : LOW);
     }
 
-    vTaskDelay(BTN_POLL_RATE / portTICK_PERIOD_MS);
+    delay(BTN_POLL_RATE);
   }
-
-  Serial.println("ButtonTask exiting");
 }

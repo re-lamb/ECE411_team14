@@ -3,7 +3,9 @@
  *
  *  Abstract:
  *      Runs the main task, which allows selection of a game/program
- *      to run from a simple graphical menu.
+ *      to run from a simple graphical menu.  It also listens for
+ *      connection requests from other players and can launch a game
+ *      in response.
  *
  *  Team 14 Project
  *  Portland State University
@@ -15,8 +17,12 @@
 #include "GameMan.h"
 #include "graphics.h"
 #include "button.h"
-#include "about.h"
+#include "network.h"
 
+// For each app on the menu
+#include "about.h"
+#include "sysinfo.h"
+#include "tictactoe.h"
 
 MenuTask::MenuTask()
   : GMTask("MENU") {
@@ -25,33 +31,67 @@ MenuTask::MenuTask()
 /*
  * Set up the menu data structures.  Called ONCE at startup.
  */
-void MenuTask::setup() {
+void MenuTask::setup(bool rsvp) {
 
-  Serial.println("Menu task initializing");
+  Serial.println("menu: Task initializing");
+
+  strcpy(currentApp, "MENU");
 
   // Build the array in the order to be displayed
-  strncpy(items[0].progName, "About...", MENU_MAX_CHARS);
-  items[0].icon = about16_bmp;
   items[0].prog = new AboutBox;
+  items[0].icon = about16_bmp;
+  strncpy(items[0].progName, AboutBox::appName.c_str(), MENU_MAX_CHARS);
 
-  // Fake ones for testing
-  strncpy(items[1].progName, "Sys Info", MENU_MAX_CHARS);
+  items[1].prog = new SysInfo;
   items[1].icon = info16_bmp;
-  items[1].prog = NULL;
+  strncpy(items[1].progName, SysInfo::appName.c_str(), MENU_MAX_CHARS);
 
-  strncpy(items[2].progName, "Battleship", MENU_MAX_CHARS);
-  items[2].icon = NULL;
-  items[2].prog = NULL;
+  items[2].prog = new TicTacToe;
+  items[2].icon = ttt16_bmp;
+  strncpy(items[2].progName, TicTacToe::appName.c_str(), MENU_MAX_CHARS);
 
-  strncpy(items[3].progName, "Tic-Tac-Toe", MENU_MAX_CHARS);
+  // TBD
   items[3].icon = NULL;
   items[3].prog = NULL;
+  strncpy(items[3].progName, "Battleship", MENU_MAX_CHARS);
 
-  strncpy(items[4].progName, "MazeWar!", MENU_MAX_CHARS);
-  items[4].icon = about16_bmp;
   items[4].prog = NULL;
+  items[4].icon = about16_bmp;
+  strncpy(items[4].progName, "MazeWar!", MENU_MAX_CHARS);
 
-  Serial.println("Menu init complete");
+  Serial.println("menu: Init complete");
+}
+
+/*
+ *  Wait for the network to initialize, then set up our packet
+ *  queue to receive RSVP requests from other GM nodes.
+ */
+bool MenuTask::startNetwork() {
+
+  dprint("menu: Setting up RSVP queue");
+
+  // At system startup, task launch times might not be deterministic
+  // so wait for the network to report itself open for business
+  while (!netTask.isRunning()) {
+    delay(100);
+    dprint(".");
+  }
+  dprintln();
+
+  // Ok!  Set up our packet queue
+  rsvpId = netTask.createQueue(4);
+
+  // Add a filter for our packet type
+  if (netTask.addFilter(rsvpId, GM_RSVP) < 0) {
+    // If queue or filter add failed, no network; bail out
+    Serial.println("menu: Could not initialize the network!");
+    return false;
+  }
+
+  // Now grab our actual handle for reading packets!
+  rsvpQ = netTask.getHandle(rsvpId);
+
+  return true;
 }
 
 /*
@@ -60,8 +100,6 @@ void MenuTask::setup() {
 void MenuTask::redrawMenu() {
   int16_t x1, y1;
   uint16_t w, h;
-
-  Serial.println("menu: Entering redraw");
 
   /*
    *  Format of the main menu:
@@ -81,9 +119,9 @@ void MenuTask::redrawMenu() {
 
   display.clearDisplay();
   display.setTextSize(1);
-  display.setTextColor(SSD1327_WHITE);
+  display.setTextColor(WHITE);
   display.fillRect(0, 0, display.width(), display.height(), HALF_BRIGHT);
-  display.drawRect(1, 1, display.width() - 2, display.height() - 2, SSD1327_BLACK);  // fixme
+  display.drawRect(1, 1, display.width() - 2, display.height() - 2, BLACK);  // fixme
 
   // Set a nice menu font, then compute its height, center the header
   display.setFont(&FreeSans9pt7b);
@@ -96,7 +134,7 @@ void MenuTask::redrawMenu() {
   // Center and print the header
   display.setCursor((display.width() - w) / 2, fontHeight + MENU_BORDER);
   display.println(MENU_HEADER);
-  display.drawFastHLine(2, fontHeight + MENU_Y_OFFSET, display.width() - 3, SSD1327_BLACK);
+  display.drawFastHLine(2, fontHeight + MENU_Y_OFFSET, display.width() - 3, BLACK);
 
   // Skip header + border; leave room above/below for highlight
   y1 = MENU_Y_OFFSET + fontHeight + boxHeight;
@@ -111,7 +149,7 @@ void MenuTask::redrawMenu() {
 
     // Draw the mini icon
     if (items[i].icon != NULL)
-      display.drawBitmap(MENU_BORDER, y1 - MENU_ICON_SZ, items[i].icon, MENU_ICON_SZ, MENU_ICON_SZ, SSD1327_WHITE);
+      display.drawBitmap(MENU_BORDER, y1 - MENU_ICON_SZ, items[i].icon, MENU_ICON_SZ, MENU_ICON_SZ, WHITE);
 
     // Finally, draw the text
     if (items[i].progName != NULL) {
@@ -134,16 +172,14 @@ void MenuTask::redrawMenu() {
  */
 void MenuTask::showSelected(bool on) {
 
-  // Serial.printf("menu: showSelected called for item %d\n", selected);
-
   if (selected < 0 || selected >= MENU_MAX_ITEMS) {
-    Serial.println("menu: selection out of range!");
+    dprintf("menu: selection %d out of range!\n", selected);
     return;
   }
 
   if (on) {
     display.fillRect(MENU_X_OFFSET - 1, yPos[selected] - boxHeight + 2,
-                     display.width() - MENU_X_OFFSET - MENU_BORDER, boxHeight, SSD1327_BLACK);
+                     display.width() - MENU_X_OFFSET - MENU_BORDER, boxHeight, BLACK);
   } else {
     display.fillRect(MENU_X_OFFSET - 1, yPos[selected] - boxHeight + 2,
                      display.width() - MENU_X_OFFSET - MENU_BORDER, boxHeight, HALF_BRIGHT);
@@ -155,6 +191,10 @@ void MenuTask::showSelected(bool on) {
   display.display();
 }
 
+char *MenuTask::getCurrentApp() {
+  return currentApp;
+}
+
 /*
  *  MenuTask main loop
  *
@@ -163,15 +203,26 @@ void MenuTask::showSelected(bool on) {
  *  never exits; when an app is started up, it basically sleeps in the background
  *  waiting for the app to signal completion, then it cleans up, resets the screen
  *  and allows another program to be chosen.
+ *
+ *  RSVP requests from other nodes when the menu is active trigger a dialog that
+ *  lets the user accept or reject the connection.  If accepted, the menu invokes
+ *  the requested program with the "rsvp" flag set so the app can start up in
+ *  guest mode and synchronize with the requester.  RSVPs when another app is
+ *  running are ignored/rejected (for now).
  */
 void MenuTask::run() {
 
   bool appRunning = false;
+  bool guest = false;
   button_event_t press;
   TaskHandle_t app;
 
-  Serial.printf("Menu task starting up on core %d\n", xPortGetCoreID());
+  Serial.printf("menu: Task starting up on core %d\n", xPortGetCoreID());
   delay(10);
+
+  if (!startNetwork()) {
+    Serial.println("menu: RSVP service not available");
+  }
 
   redrawMenu();
   showSelected(true);
@@ -181,7 +232,7 @@ void MenuTask::run() {
     if (!appRunning) {
 
       // We're in the foreground, so grab button events
-      if (xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
+      if (xQueueReceive(buttonEvents, &(press), (TickType_t)25)) {
 
         if (press.action == btnReleased || press.action == btnRepeat) {
 
@@ -200,7 +251,7 @@ void MenuTask::run() {
             case BTN_B:
               // button B is "yes"/doit -- ignore repeats
               if (press.action != btnRepeat) {
-                Serial.printf("Selected item %d!\n", selected);
+                dprintf("Selected item %d!\n", selected);
                 if (items[selected].prog != NULL)
                   appRunning = true;
               }
@@ -212,33 +263,69 @@ void MenuTask::run() {
         }
       }
 
-      // Wait a while.  Humans aren't that fast, maybe 20-50ms typical?
-      delay(50);
+      // Check the network queue for RSVP events
+      if (rsvpQ) {
+
+        gm_packet_t pkt;
+        iff_packet_t rsvp;
+
+        if (xQueueReceive(rsvpQ, &(pkt), (TickType_t)25)) {
+          Serial.println("menu: Received RSVP packet");
+
+          // Sanity check...
+          if (pkt.pktType != GM_RSVP || pkt.length != sizeof(iff_packet_t)) {
+            dprintf("BAD type (%d) or payload length (%d)\n", pkt.pktType, pkt.length);
+          } else {
+            // Copy it out
+            memcpy(&rsvp, pkt.payload, pkt.length);
+            dprintf("Invite from %s to play %s\n", rsvp.who, rsvp.what);
+            // run the dialog
+            // for now, just say YES; update the payload and ship it back
+            // assume we have the same programs but a findProg(rsvp.what) to make sure
+            //
+            //netTask.sendTo();
+          }
+        }
+      }
 
     } else {
 
       // User selected a program to run!
-      Serial.printf("About to launch %s\n", items[selected].progName);
+      dprintf("menu: Launching %s\n", items[selected].progName);
 
       // todo: some kind of animation to fade the menu or blink the selection
       // a couple of times to start the transition?
       GMTask *app = items[selected].prog;
+      strncpy(currentApp, items[selected].progName, MENU_MAX_CHARS);
 
       // Call the setup() method in case the program needs to do any
-      app->setup();
+      app->setup(guest);
 
       // Launch the program in its own task and save the handle
       app->start();
 
       // Now loop in the background until it completes
-      // (Here we could listen for a special keypress to abort/return if stuck/etc?
-      // Like if they hold C down for 3 seconds or something)
       while (appRunning) {
+
+        // Toss any RSVP packets that arrive, since we're busy...
+        if (rsvpQ) {
+          gm_packet_t pkt;
+
+          if (xQueueReceive(rsvpQ, &(pkt), (TickType_t)0)) {
+            dprintln("menu: Ignored RSVP (busy)");
+          }
+        }
+        
         delay(250);                       // reduce frequency to save battery :-)
-        appRunning = !app->isComplete();  // there are better ways to do this
+        appRunning = app->isRunning();    // there are better ways to do this
       }
 
-      // We have control again, so repaint the screen
+      // Properly close down the (suspended) task
+      app->end();
+
+      // We have control again, so reset and repaint the screen
+      strcpy(currentApp, "MENU");
+      guest = false;
       redrawMenu();
       showSelected(true);
 
@@ -246,6 +333,4 @@ void MenuTask::run() {
       xQueueReset(buttonEvents);
     }
   }
-
-  Serial.println("Menu task exiting!");
 }

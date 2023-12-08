@@ -17,9 +17,11 @@ AboutBox::AboutBox()
   : GMTask("ABOUT") {
 }
 
-void AboutBox::setup() {
+const String AboutBox::appName = "About";
+
+void AboutBox::setup(bool rsvp) {
   // Nothing to do here for now
-  Serial.println("AboutBox setup called");
+  dprintln("AboutBox setup called");
 }
 
 void AboutBox::showAboutBox() {
@@ -30,7 +32,7 @@ void AboutBox::showAboutBox() {
   display.clearDisplay();
   display.setFont();
   display.setTextSize(2);
-  display.setTextColor(SSD1327_WHITE);
+  display.setTextColor(WHITE);
   display.setCursor(getCenterX("GameMan!"), y - 30);
   display.print("GameMan!");
 
@@ -53,23 +55,22 @@ void AboutBox::run() {
   bool blinkOn = false;
   button_event_t press;
 
-  Serial.println("Starting AboutBox task");
+  Serial.println("AboutBox: Task starting");
 
   showAboutBox();
 
   display.setTextSize(1);
   int16_t x = getCenterX(msg);
 
-  while (!xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
+  // Use the button timeout of 500ms as the blink rate :-)
+  while (!xQueueReceive(buttonEvents, &(press), (TickType_t)500)) {
 
     blinkOn = !blinkOn;
     display.setCursor(x, display.height() - 10);
-    display.setTextColor(blinkOn ? SSD1327_WHITE : SSD1327_BLACK);
+    display.setTextColor(blinkOn ? WHITE : BLACK);
     display.print(msg);
     display.display();
-
-    delay(500);
   }
 
-  Serial.println("AboutBox task complete, exiting");
+  Serial.println("AboutBox: Task complete");
 }

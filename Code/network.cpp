@@ -17,35 +17,48 @@
  *  ECE411 Fall 2023
  */
 
+#include <Preferences.h>
+
+#include "GameMan.h"
 #include "network.h"
 
 // Quick and dirty check to see that the given qId is in range
-#define VALID(q) (q >= 0 && q < numClients)
+#define VALID(x) (x >= 0 && x < MAX_CLIENTS && clients[x].inUse)
 
 NetworkTask::NetworkTask()
-  : GMTask("NET", 8192, 2, PRO_CPU_NUM) {
+  : GMTask("NET") {     // , 8192, 2, PRO_CPU_NUM) {
 
   // Maybe not required, but good practice?
   initialized = false;
+  lastHello = 0;
   numClients = 0;
-  pktsSent = 0;
-  pktsReceived = 0;
-  pktsDropped = 0;
+
+  for (int i = 0; i <= pktDropped; i++) {
+    pktStats[i] = 0;
+  }
 
   for (int i = 0; i < MAX_CLIENTS; i++) {
     clients[i].inUse = false;
   }
+
+  for (int i = 0; i < MAX_PLAYERS; i++) {
+    memset(&players[i], 0, sizeof(gm_player_t));
+  }
 }
+
+QueueHandle_t NetworkTask::incoming;
+int NetworkTask::pktStats[6];
 
 /*
  *  Initialize the ESP NOW network stack.
  */
-void NetworkTask::setup() {
+void NetworkTask::setup(bool rsvp) {
 
   esp_err_t err;
   char name[GM_PLAYER_TAG_LEN];
+  Preferences prefs;
 
-  Serial.println("Network task initializing");
+  Serial.println("net: Task initializing");
 
   // Put ESP32 into Station mode
   WiFi.mode(WIFI_MODE_STA);
@@ -53,49 +66,66 @@ void NetworkTask::setup() {
   // Init the network stack
   err = esp_now_init();
   if (err != ESP_OK) {
-    Serial.printf("Error %d trying to initialize ESP NOW!\n", err);
+    Serial.printf("net: Error %d trying to initialize ESP NOW!\n", err);
   } else {
-    Serial.println("ESP NOW initialized");
+    Serial.println("net: ESP NOW initialized");
     initialized = true;
   }
 
   // Register the broadcast address as a peer?
   esp_now_peer_info_t all;
-  memset(&all, 0, sizeof(all));         // work around bug in esp-now 2.x
+  memset(&all, 0, sizeof(esp_now_peer_info_t));  // work around bug in esp-now 2.x
   memcpy(all.peer_addr, broadcast, 6);
 
   err = esp_now_add_peer(&all);
   if (err != ESP_OK) {
-    Serial.printf("Error %d registering the broadcast peer!\n", err);
-    // return;
+    Serial.printf("net: Error %d registering the broadcast peer!\n", err);
   }
 
   // Print MAC Address to Serial monitor
-  Serial.print("MAC Address: ");
-  Serial.println(WiFi.macAddress());
+  dprint("net: MAC Address: ");
+  dprintln(WiFi.macAddress());
 
   // and save it to our player record
-  WiFi.macAddress(me.node);
+  WiFi.macAddress(players[0].node);
 
   // Open up our nvram namespace
   if (!prefs.begin(GM_NVM_KEY, false)) {
-    Serial.println("Failed to open preferences!?");
+    Serial.println("net: Failed to open preferences!?");
   }
 
   // Fetch our own player info
-  memset(name, 0, sizeof(name));
-  if (!prefs.getString("tag", name, GM_PLAYER_TAG_LEN) || strlen(name) == 0) {
-    Serial.println("Player tag not found in NVRAM, setting default");
+  if (prefs.getBytes("tag", &name, GM_PLAYER_TAG_LEN) < 1) {
+    Serial.println("net: Player tag not found in NVRAM, setting default");
 
     snprintf(name, GM_PLAYER_TAG_LEN, "Player%d", random(1, 99));
-    setPlayerName(name);
 
-    if (!prefs.putString("tag", name)) {
-      Serial.printf("Failed to save player tag '%s' in NVRAM\n", name);
+    // Save it to the nvram
+    if (!prefs.putBytes("tag", name, GM_PLAYER_TAG_LEN)) {
+      Serial.printf("net: Failed to save player tag '%s' in NVRAM\n", name);
     }
   }
-  
-  Serial.printf("Player tag set: '%s'\n", getPlayerName());
+
+  // Set it in the player table
+  setPlayerName(name);
+  dprintf("net: Player tag set: '%s'\n", getPlayerName());
+  prefs.end();
+}
+
+/*
+ *  Pretty print a wifi/Ethernet address quick and dirty.  mac better point to
+ *  at least six bytes of the address to output.
+ */
+const char *NetworkTask::fmtMAC(const uint8_t *mac) {
+  static char buf[18];
+
+  sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  return buf;
+}
+
+String NetworkTask::getNodeAddr() {
+  String str = String(fmtMAC(players[0].node));
+  return str;
 }
 
 /*
@@ -111,6 +141,8 @@ bool NetworkTask::isRunning() {
  */
 int NetworkTask::createQueue(int maxDepth) {
 
+  if (!initialized) return -1;
+
   for (int i = 0; i < MAX_CLIENTS; i++) {
 
     if (!clients[i].inUse) {
@@ -118,15 +150,21 @@ int NetworkTask::createQueue(int maxDepth) {
       // Try to create a new queue; if that fails, bail out
       clients[i].handle = xQueueCreate(maxDepth, maxDepth * sizeof(gm_packet_t));
       if (clients[i].handle == 0) {
-        Serial.println("ERROR: failed to create network queue!!");
+        Serial.println("net: Failed to create network queue!!");
         return -1;
       }
 
       // We're good!
       clients[i].inUse = true;
-      clients[i].numFilters = 0;
       clients[i].numReceived = 0;
+      clients[i].numFilters = 0;
+      for (int j = 0; j < MAX_FILTERS; j++) {
+        clients[i].filters[j] = GM_INVALID;
+      }
+
+      dprintf("net: Client %d queue created\n", i);
       numClients++;
+      return i;
     }
   }
 
@@ -147,12 +185,12 @@ QueueHandle_t NetworkTask::getHandle(int qId) {
  *  should clean up when exiting or the table will eventually fill up!
  */
 void NetworkTask::destroyQueue(int qId) {
-  if (VALID(qId) && clients[qId].inUse) {
+  if (VALID(qId)) {
     clients[qId].inUse = false;
     vQueueDelete(clients[qId].handle);
     clients[qId].handle = NULL;
     numClients--;
-    Serial.printf("--> Network client %d queue destroyed\n", qId);
+    dprintf("net: Client %d queue destroyed\n", qId);
   }
 }
 
@@ -161,38 +199,36 @@ void NetworkTask::destroyQueue(int qId) {
  *  slots or the qId is invalid; returns >= 0 if added successfully.
  */
 int NetworkTask::addFilter(int qId, uint8_t code) {
-  if (!VALID(qId) || !clients[qId].inUse) return -1;
+  if (!VALID(qId)) return -1;
 
   for (int i = 0; i < MAX_FILTERS; i++) {
     if (clients[qId].filters[i] == GM_INVALID) {
-      clients[qId].filters[i] == code;
+      clients[qId].filters[i] = code;
       clients[qId].numFilters++;
-      Serial.printf("--> Added filter for type %d to queue %d (%d active)\n", code, qId, clients[qId].numFilters);
+      dprintf("net: Client %d added type %d filter (%d active)\n", qId, code, clients[qId].numFilters);
       return i;
     }
   }
 
-  // No more slots!
-  return -1;
+  return -1;  // No more slots!
 }
 
 /*
  *  Stop receiving certain packet types.
  */
 int NetworkTask::dropFilter(int qId, uint8_t code) {
-  if (!VALID(qId) || !clients[qId].inUse) return -1;
+  if (!VALID(qId)) return -1;
 
   for (int i = 0; i < MAX_FILTERS; i++) {
     if (clients[qId].filters[i] == code) {
       clients[qId].filters[i] = GM_INVALID;
       clients[qId].numFilters--;
-      Serial.printf("--> Dropped filter for type %d from queue %d (%d active)\n", code, qId, clients[qId].numFilters);
+      dprintf("net: Client %d dropped type %d filter (%d active)\n", qId, code, clients[qId].numFilters);
       return i;
     }
   }
 
-  // Didn't find it...
-  return -1;
+  return -1;  // Didn't find it...
 }
 
 /*
@@ -201,37 +237,10 @@ int NetworkTask::dropFilter(int qId, uint8_t code) {
 int NetworkTask::sendAll(gm_packet_t pkt) {
 
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcast, (uint8_t *) &pkt, sizeof(gm_packet_t));
-   
-  if (result == ESP_OK) {
-    Serial.println("Send (broadcast) confirmed");
-    pktsSent++;
-  }
-  else if (result == ESP_ERR_ESPNOW_NOT_INIT)
-  {
-    Serial.println("ESP-NOW not Init.");
-  }
-  else if (result == ESP_ERR_ESPNOW_ARG)
-  {
-    Serial.println("Invalid Argument");
-  }
-  else if (result == ESP_ERR_ESPNOW_INTERNAL)
-  {
-    Serial.println("Internal Error");
-  }
-  else if (result == ESP_ERR_ESPNOW_NO_MEM)
-  {
-    Serial.println("ESP_ERR_ESPNOW_NO_MEM");
-  }
-  else if (result == ESP_ERR_ESPNOW_NOT_FOUND)
-  {
-    Serial.println("Peer not found.");
-  }
-  else
-  {
-    Serial.println("Unknown error");
-  }
+  esp_err_t result = esp_now_send(broadcast, (uint8_t *)&pkt, sizeof(gm_packet_t));
   
+  dprintf("net: Sent broadcast (type %d)\n", pkt.pktType);
+  sendAccounting(result);
   return result;
 }
 
@@ -240,30 +249,61 @@ int NetworkTask::sendAll(gm_packet_t pkt) {
  */
 int NetworkTask::sendTo(gm_player_t player, gm_packet_t pkt) {
 
-  // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(player.node, (uint8_t *) &pkt, sizeof(gm_packet_t));
-   
-  if (result == ESP_OK) {
-    Serial.println("Sending confirmed");
-    pktsSent++;
-  }
-  else {
-    Serial.println("Sending error");
-    // count failures
-  }
+  // todo: if the player isn't a peer, add them, then send
+  esp_err_t result = esp_now_send(player.node, (uint8_t *)&pkt, sizeof(gm_packet_t));
+
+  dprintf("net: Sent to %s (type %d)\n", player.tag, pkt.pktType);
+  sendAccounting(result);
   return result;
 }
 
+// todo: group send (for multiplayer) just uses NULL as the address; useful for mazewar!
+
 /*
- *  Callback for ALL packets received from ESP NOW.  This should be fast,
- *  but since we don't run any really high bandwidth apps (yet?) for now 
- *  we just dispatch() the packet directly, which isn't optimal but I think
- *  the dual-240MHz ESP32 can handle it!
+ *  For debugging, check/print error code and count stats.
+ */
+void NetworkTask::sendAccounting(esp_err_t err) {
+
+  if (err == ESP_OK) {
+    pktStats[pktTotalSent]++;
+  } else {
+    // For debugging, enumerate the error
+    Serial.print("net: Send error: ");
+
+    switch (err) {
+      case ESP_ERR_ESPNOW_NOT_INIT: Serial.println("ESP-NOW not initialized"); break;
+      case ESP_ERR_ESPNOW_ARG: Serial.println("Invalid argument"); break;
+      case ESP_ERR_ESPNOW_INTERNAL: Serial.println("Internal error"); break;
+      case ESP_ERR_ESPNOW_NO_MEM: Serial.println("No memory"); break;
+      case ESP_ERR_ESPNOW_NOT_FOUND: Serial.println("Peer not found"); break;
+      default:
+        Serial.println("Unknown error");
+    }
+
+    pktStats[pktSendError]++;
+  }
+}
+
+/*
+ *  Callback for ALL packets received from ESP NOW.  To sidestep all the
+ *  Arduino C++/ESP-IDF C calling nonsense, just queue everything and let
+ *  the dispatch() run during the main task loop.  This is kind of horrible
+ *  and inefficient but time is short and we can make it pretty later.
  */
 void NetworkTask::recvCallback(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-  Serial.printf("Received from %02x:%02x:%02x:%02x:%02x:%02x (%d bytes)\n",
-                 mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5], data_len);
 
+  gm_packet_t pkt;
+
+  dprintf("net: Received from %s (%d bytes)\n", fmtMAC(mac_addr), data_len);
+
+  memcpy(&pkt, data, data_len);
+
+  if (xQueueSendToBack(incoming, &(pkt), (TickType_t)0) != pdTRUE) {
+    Serial.println("net: Incoming queue full, packet dropped!");
+    pktStats[pktRecvOverflow]++;
+  } else {
+    pktStats[pktTotalRecv]++;
+  }
 }
 
 /*
@@ -271,53 +311,240 @@ void NetworkTask::recvCallback(const uint8_t *mac_addr, const uint8_t *data, int
  *  anyone is filtering for it.  Otherwise just drop it.
  */
 void NetworkTask::dispatch() {
-  pktsReceived++;
-  pktsDropped++;
+
+  gm_packet_t pkt;
+
+  // If our network isn't up, there's nothin' to do
+  if (!initialized || !incoming) return;
+
+  // Got packets?  Wait (block) up to 10ms...
+  if (!xQueueReceive(incoming, &(pkt), (TickType_t)10)) return;
+
+  dprintf("net: Dispatch type %d: ", pkt.pktType);
+
+  // See if anyone wants it
+  // todo: this is brute force and slow, but sufficient for now?
+  for (int q = 0; q < MAX_CLIENTS; q++) {
+    if (clients[q].inUse) {
+      // dprintf("\n--> client %d ", q);
+      for (int f = 0; f < MAX_FILTERS; f++) {
+        if (clients[q].filters[f] == pkt.pktType) {
+          // dprintf("match filter %d! ", f);
+          if (clients[q].handle) {
+            // dprintln("handle is good, about to queue:");
+            if (xQueueSendToBack(clients[q].handle, &(pkt), (TickType_t)0) == pdTRUE) {
+              dprintf("Sent to client %d\n", q);
+              pktStats[pktDispatched]++;
+              clients[q].numReceived++;
+            } else {
+              dprintf("Failed, client %d queue full!\n", q);
+              pktStats[pktDropped]++;
+            }
+          } else {
+            dprintf("Failed, client %d queue invalid!\n", q);
+            pktStats[pktDropped]++;
+          }
+          // Bug out. For now, it's first come, first served...
+          return;
+        }
+      }
+    }
+  }
+
+  // Nobody's interested
+  dprintln("Dropping unloved packet");
+  pktStats[pktDropped]++;
 }
 
-// debugging
+/*
+ *  (Internal) Convenience routine to construct and send an IFF_HELLO or
+ *  GOODBYE broadcast packet.
+ */
+void NetworkTask::sendIFF(uint8_t code) {
+  gm_packet_t pkt;
+  iff_packet_t hello;
+
+  // Fill in the payload
+  hello.type = code;
+  hello.reqId = 0;
+  memcpy(hello.who, players[0].tag, GM_PLAYER_TAG_LEN);
+  strncpy(hello.what, menuTask.getCurrentApp(), IFF_PAYLOAD);
+  hello.timeSent = xTaskGetTickCount();
+
+  // Fill in the GM wrapper
+  pkt.pktType = GM_IFF;
+  memcpy(pkt.dstAddr, broadcast, ADDR_LEN);
+  memcpy(pkt.srcAddr, players[0].node, ADDR_LEN);
+  pkt.length = sizeof(iff_packet_t);
+  memcpy(pkt.payload, &hello, pkt.length);
+
+  // Ship it!
+  sendAll(pkt);
+}
+
+/*
+ *  Broadcast an RSVP packet.  This is a slight tweak to the IFF format
+ *  used just to poke the menuTask when trying to sync up two players
+ *  to start a game.  Normal IFF receive processing uses the replyTo
+ *  field as the queue ID to send responses back to the requester.
+ *  Network rendezvous is hard and this is a quick hack.
+ */
+void NetworkTask::sendRSVP(const char *appRequest, uint8_t replyTo) {
+  gm_packet_t pkt;
+  iff_packet_t rsvp;
+
+  // Fill in the payload
+  rsvp.type = IFF_RSVP;
+  rsvp.reqId = replyTo;
+  memcpy(rsvp.who, players[0].tag, GM_PLAYER_TAG_LEN);
+  strncpy(rsvp.what, appRequest, IFF_PAYLOAD);
+  rsvp.timeSent = xTaskGetTickCount();
+
+  // Fill in the GM wrapper
+  pkt.pktType = GM_RSVP;
+  memcpy(pkt.dstAddr, broadcast, ADDR_LEN);
+  memcpy(pkt.srcAddr, players[0].node, ADDR_LEN);
+  pkt.length = sizeof(iff_packet_t);
+  memcpy(pkt.payload, &rsvp, pkt.length);
+
+  // Send it
+  sendAll(pkt);
+}
+
+/*
+ *  Decode and act on incoming IFF packets.
+ */
+void NetworkTask::receiveIFF(QueueHandle_t q) {
+  gm_packet_t pkt;
+  iff_packet_t iff;
+
+  if (!xQueueReceive(q, &(pkt), (TickType_t)0)) return;
+
+  dprint("net: Received IFF: ");
+
+  // Pull the IFF payload from the GM wrapper and see what to do with it
+  memcpy(&iff, pkt.payload, pkt.length);
+
+  switch (iff.type) {
+    case IFF_HELLO:
+      dprintf("HELLO from %s (running %s)\n", iff.who, iff.what);
+
+      if (strlen(iff.who) > 0) {
+
+        int playerNum = findPlayer(iff.who);
+        if (playerNum < 0) {
+          // A new friend!  Add 'em
+          playerNum = addPlayer(iff.who, pkt.srcAddr);
+        } else {
+          // An old friend!  Update 'em
+          players[playerNum].lastSeen = xTaskGetTickCount();
+        }
+      } else {
+        dprintln("net: Invalid player (name not set), ignored");
+      }
+      break;
+
+    case IFF_ACCEPT:
+    case IFF_REJECT:
+      dprintf("%s from %s (running %s)\n",
+              iff.type == IFF_ACCEPT ? "ACCEPT" : "REJECT",
+              iff.who, iff.what);
+
+      // Send it to the original requester!
+      // Same as dispatch(), but bypassing filters; make sure the
+      // queue still exists, since they may have gone away
+      if (VALID(iff.reqId)) {
+        if (xQueueSendToBack(clients[iff.reqId].handle, &(pkt), (TickType_t)0) == pdTRUE) {
+          dprintf("net: Dispatched to client %d\n", iff.reqId);
+          pktStats[pktDispatched]++;
+          clients[iff.reqId].numReceived++;
+        } else {
+          dprintf("net: Dispatch failed, client %d queue full!\n", iff.reqId);
+          pktStats[pktDropped]++;
+        }
+      } else {
+        dprintf("net: Dispatch failed, client %d queue invalid!\n", iff.reqId);
+        pktStats[pktDropped]++;
+      }
+      break;
+
+    case IFF_GOODBYE:
+      dprintf("GOODBYE from %s (unimplemented)\n", iff.who);
+      // use this to delete a player/mac association
+      // if they are changing their name, we want to flush the old
+      // or they are just switching off or have timed out, battery died, ...
+      break;
+
+    default:
+      dprintf("Unknown type %d!\n", iff.type);
+      // Should never happen; if it does, hex/ascii dump the payload?
+      break;
+  }
+}
+
+/*
+ *  Debugging output to serial port.
+ */
 void NetworkTask::dumpStats() {
 
   if (!initialized) {
     Serial.println("ESP NOW networking not initialized!");
   } else {
     Serial.printf("Wifi stats for %d active clients:\n", numClients);
-    Serial.printf("%d packets sent, %d recvd, %d dropped\n", pktsSent, pktsReceived, pktsDropped);
+    Serial.printf("  Sent:  %d success, %d fail\n", pktStats[pktTotalSent], pktStats[pktSendError]);
+    Serial.printf("  Recv:  %d total, %d overflow\n", pktStats[pktTotalRecv], pktStats[pktRecvOverflow]);
+    Serial.printf("  Queue: %d dispatched, %d dropped\n", pktStats[pktDispatched], pktStats[pktDropped]);
   }
 }
 
+/*
+ *  Get or set the player's name (on this node)
+ */
 char *NetworkTask::getPlayerName() {
-  return me.tag;
+  return players[0].tag;
 }
 
 void NetworkTask::setPlayerName(char *name) {
-  strncpy(me.tag, name, GM_PLAYER_TAG_LEN);
+  dprintf("net: setPlayerName to '%s'\n", name);
+  strncpy(players[0].tag, name, GM_PLAYER_TAG_LEN);
 }
 
 /*
- *  Construct and send an IFF_HELLO packet.  This lets other GM nodes
- *  in range learn about us (and us about them, as we receive them).
+ *  Search for a player and return their player number, -1 if not found.
  */
-void NetworkTask::sendHello() {
-  gm_packet_t pkt;
-  iff_packet_t hello;
+int NetworkTask::findPlayer(char *name) {
 
-  // Fill in the payload
-  hello.type = IFF_HELLO;
-  memcpy(hello.who, me.tag, GM_PLAYER_TAG_LEN);
-  memcpy(hello.what, "IDLE", 5);  // hack... menuTask.getCurrentApp(); ?
-  hello.timeSent = millis();
+  for (int p = 0; p < MAX_PLAYERS; p++) {
+    if (strncmp(players[p].tag, name, GM_PLAYER_TAG_LEN) == 0) return p;
+  }
 
-  // Fill in the GM wrapper
-  memcpy(pkt.dstAddr, broadcast, ADDR_LEN);
-  memcpy(pkt.srcAddr, me.node, ADDR_LEN);
-  pkt.pktType = GM_IFF;
-  pkt.length = sizeof(hello);
-  memcpy(pkt.payload, &hello, pkt.length);
-
-  // Ship it!
-  sendAll(pkt);
+  return -1;  // nope
 }
+
+/*
+ *  Add a new network player if there's room.  Otherwise, flail.
+ */
+int NetworkTask::addPlayer(char *name, uint8_t *node) {
+
+  // Find the first slot where the name is null.  Player 0 is
+  // this node, by convention/laziness
+  for (int p = 1; p < MAX_PLAYERS; p++) {
+    if (strlen(players[p].tag) == 0) {
+      dprintf("net: Adding player '%s' (node %s) at id %d\n", name, fmtMAC(node), p);
+      strncpy(players[p].tag, name, GM_PLAYER_TAG_LEN);
+      memcpy(players[p].node, node, ADDR_LEN);
+      players[p].lastSeen = xTaskGetTickCount();
+
+      // Add them as a network peer if they aren't there already
+      
+      return p;
+    }
+  }
+
+  dprintf("net: Failed to add player '%s', no empty slots!\n", name);
+  return -1;  // fix this if more GM hardware ever gets made :-)
+}
+
 
 /*
  *  NetworkTask main loop
@@ -332,20 +559,54 @@ void NetworkTask::sendHello() {
 void NetworkTask::run() {
 
   esp_err_t err;
+  int lastHello = xTaskGetTickCount();
+  int lastStats = lastHello;
 
-  Serial.printf("Network task starting up on core %d\n", xPortGetCoreID());
+  Serial.printf("net: Task starting up on core %d\n", xPortGetCoreID());
 
-  // set up the receive callback
-  err = esp_now_register_recv_cb(recvCallback);
-  if (err != ESP_OK) {
-    Serial.printf("ERROR registering network receive callback!  %d\n", err);
+  // Create the queue for incoming ESP-NOW packets
+  incoming = xQueueCreate(MAX_PENDING, sizeof(gm_packet_t));
+  if (!incoming) {
+    Serial.println("net: Failed to create incoming packet queue!");
+    initialized = false;
   }
 
-  // loop
+  // Set up the global receive callback to actually catch them
+  err = esp_now_register_recv_cb(recvCallback);
+  if (err != ESP_OK) {
+    Serial.printf("net: ERROR %d registering network receive callback!\n", err);
+    initialized = false;
+  }
+
+  // Set up a queue for IFF packets (handled here)
+  int iffQId = createQueue();
+
+  if (addFilter(iffQId, GM_IFF) < 0) {
+    Serial.println("net: ERROR adding IFF filter!?");
+  }
+
+  // And grab the actual queue handle
+  QueueHandle_t iffQueue = getHandle(iffQId);
+
+  // Main loop
   for (;;) {
-    delay(5000);
-    sendHello();
-    delay(5000);
-    dumpStats();
+
+    // Deal with pending packets (with blocking to avoid watchdogs)
+    dispatch();
+
+    // Check our queue for local processing
+    receiveIFF(iffQueue);
+
+    // n seconds since last hello packet sent?
+    if (elapsed(IFF_INTERVAL, lastHello)) {
+      sendIFF(IFF_HELLO);
+      lastHello = xTaskGetTickCount();
+    }
+
+    // Debug: dump stats (less frequently)
+    if (elapsed(30000, lastStats)) {
+      dumpStats();
+      lastStats = xTaskGetTickCount();
+    }
   }
 }

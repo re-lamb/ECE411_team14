@@ -56,7 +56,7 @@ and enqueueing them for delivery to the current application.  This lets
 the game code look for just the incoming packets it cares about, while
 some "housekeeping" stuff (like new GameMan consoles coming into or out
 of range, or players joining/leaving the network) can be handled by the
-menuTask.
+netTask.
 
 Games/Apps:
 Each menu entry is a single object that is loaded into a new task.  A
@@ -114,7 +114,9 @@ code, since those can be set up like function calls
   if (networkTask.invite(player, this->taskName) == IFF_ACCEPT) {
     /* go into host mode and start the game loop */
   }
-
+(or for simplicity, the request goes out and the network task posts an
+IFF_ACCEPT or IFF_REJECT response to the requesting queue?  We haven't
+had time to do a unified button/packet/event loop.)
 
 Preferences
 -----------
@@ -124,6 +126,19 @@ Player name or tag is n chars (8-12?) long and kept in Preferences
 
 Other personalizations can be saved too (up to 512 bytes?) which is
 a nice touch
+
+
+Limitations
+-----------
+
+This code is a crash course in mashing up Arduino C++ with Espressif
+ESP32 straight "C" libraries.  It is NOT a great example of software
+engineering and there are a million ways to do this better/cleaner
+but given time constraints it's pretty good.  Even after the school
+term ends this will be a fun platform to program on and write games
+for.  We should make sure to preserve the Github repo and project 
+files so eventually a case for the hardware can be printed up and the
+software preserved and shared.
 
 
 

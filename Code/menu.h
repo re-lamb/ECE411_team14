@@ -14,17 +14,18 @@
 #define _GM_MENU_H_
 
 #include "task.h"
+#include "network.h"
 
-#define MENU_MAX_ITEMS  5     // number of items (for now)
-#define MENU_MAX_CHARS  15    // room for icon, selection box
+#define MENU_MAX_ITEMS 5    // number of items (for now)
+#define MENU_MAX_CHARS 15   // room for icon, selection box
 
-#define MENU_NUM_ITEMS  (MENU_MAX_ITEMS - 1)
+#define MENU_NUM_ITEMS (MENU_MAX_ITEMS - 1)
 
-#define MENU_HEADER     "~~ Menu ~~"
-#define MENU_BORDER     3     // 1 pixel hairline
-#define MENU_ICON_SZ    16    // 16 x 16 square
-#define MENU_X_OFFSET   (MENU_BORDER + MENU_ICON_SZ + 1)
-#define MENU_Y_OFFSET   (MENU_BORDER * 2)
+#define MENU_HEADER   "~ Menu ~"
+#define MENU_BORDER   3     // 1 pixel hairline
+#define MENU_ICON_SZ  16    // 16 x 16 square
+#define MENU_X_OFFSET (MENU_BORDER + MENU_ICON_SZ + 1)
+#define MENU_Y_OFFSET (MENU_BORDER * 2)
 
 
 typedef struct menuItem {
@@ -35,22 +36,28 @@ typedef struct menuItem {
 
 
 class MenuTask : public GMTask {
-  public:
-    MenuTask();
-    void setup() override;
-    
-  private:
-    byte selected = 0;
-    int16_t fontHeight = 0;
-    int16_t boxHeight = 0;
+public:
+  MenuTask();
+  void setup(bool rsvp) override;
+  char *getCurrentApp();
 
-    menuItem_t items[MENU_MAX_ITEMS];
-    int16_t yPos[MENU_MAX_ITEMS];
+private:
+  void run() override;
 
-    void run() override;
+  bool startNetwork();
+  void redrawMenu();
+  void showSelected(bool on);
 
-    void redrawMenu();
-    void showSelected(bool on);
+  byte selected = 0;
+  int16_t fontHeight = 0;
+  int16_t boxHeight = 0;
+  char currentApp[MENU_MAX_CHARS];
+
+  menuItem_t items[MENU_MAX_ITEMS];
+  int16_t yPos[MENU_MAX_ITEMS];
+
+  int rsvpId;
+  QueueHandle_t rsvpQ;
 };
 
 #endif

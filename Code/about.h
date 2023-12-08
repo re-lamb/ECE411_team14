@@ -14,12 +14,14 @@
 #ifndef _GM_ABOUT_H_
 #define _GM_ABOUT_H_
 
-#define GM_VERSION 0.4
+#define GM_VERSION 0.8
 
 class AboutBox : public GMTask {
   public:
     AboutBox();
-    void setup();
+    void setup(bool rsvp) override;
+
+    static const String appName;
 
   private:
     void showAboutBox();

@@ -20,7 +20,7 @@ public:
   virtual ~GMTask();
 
   // Called by the menu prior to task launch
-  virtual void setup() = 0;
+  virtual void setup(bool rsvp) = 0;
 
   // Called by the menu to launch the task
   void start();
@@ -28,17 +28,20 @@ public:
   void suspend();
   void resume();
   void stop();
+  void end();
 
   TaskHandle_t getHandle();
   const char *getName();
   void *getData();
-  bool isComplete();
+  bool isRunning();
 
 protected:
   // Body of the task (override for subclass-specific code,
   // i.e., put the app/game code here!)
   virtual void run() = 0;
   static void delay(int ms);
+  static bool elapsed(int ms, TickType_t since);
+  static bool elapsed(int ms, TickType_t since, TickType_t now);
 
 private:
   const char *_taskName;
@@ -48,7 +51,7 @@ private:
   void *_taskData;
   TaskHandle_t _taskHandle;
 
-  volatile bool _taskComplete = true;
+  volatile bool _taskRunning = false;
 
   /*
  * Create an instance of the C++ object to run on the new task.  This is

@@ -42,6 +42,9 @@ NetworkTask netTask;
 
 QueueHandle_t buttonEvents;
 
+// debug
+TickType_t last = 0;
+
 void showTasks() {
 
   // Courtesy of Espressif: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/freertos_idf.html#misc
@@ -49,7 +52,10 @@ void showTasks() {
   //vTaskList(writeBuf);      // not available in standard arduino esp-idf build?
   //Serial.println(writeBuf); // so it doesn't work. :-(
 
-  Serial.printf("System says %d tasks are present\n", uxTaskGetNumberOfTasks());
+  Serial.printf("System: %d tasks  Stack: %d  Heap: %lu\n",
+                uxTaskGetNumberOfTasks(),
+                uxTaskGetStackHighWaterMark(NULL),
+                (unsigned long)ESP.getFreeHeap());
 }
 
 /*
@@ -109,8 +115,8 @@ void showSplash() {
 
   display.setTextSize(1);
   display.setTextColor(DARK_GRAY);
-  display.setCursor(getCenterX("Initializing..."), display.height() - 10);
-  display.print("Initializing...");
+  display.setCursor(getCenterX("[Initializing]"), display.height() - 10);
+  display.print("[Initializing]");
   display.display();
   delay(1000);
 }
@@ -164,11 +170,11 @@ void fadeSplash() {
  */
 void setup() {
 
-  char debugData[32];
-
   // Setup serial port and announce ourselves
   Serial.begin(115200);
-  delay(100);
+  while (!Serial) delay(200);
+
+  Serial.println();
   Serial.println("GameMan v" + String(GM_VERSION) + " initializing");
 
   // Initialize and clear the display
@@ -185,13 +191,13 @@ void setup() {
   showSplash();
 
   // Initialize the button(s)
-  buttonTask.setup();
+  buttonTask.setup(false);
 
   // Set up the network/player info
-  netTask.setup();
+  netTask.setup(false);
 
   // Build the menu
-  menuTask.setup();
+  menuTask.setup(false);
 
   // Create the event queues
   buttonEvents = xQueueCreate(10, sizeof(button_event_t));
@@ -204,17 +210,21 @@ void setup() {
 
   // debug
   showTasks();
-  
+
   // Start up the background tasks
   netTask.start();
   buttonTask.start();
   menuTask.start();
-
-  // debug
-  showTasks();
 }
 
 
 void loop() {
   // Nothing to do here?  should periodically dump task status!
+  // Could have this be a battery monitor or something...
+
+  // temporary - debug
+  if (((xTaskGetTickCount() - last) / portTICK_PERIOD_MS) >= 10000) {
+    showTasks();
+    last = xTaskGetTickCount();
+  }
 }
