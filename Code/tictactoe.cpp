@@ -13,6 +13,8 @@
  *  ECE411 Fall 2023
  */
 
+#include <Preferences.h>
+
 #include "GameMan.h"
 #include "button.h"
 #include "tictactoe.h"
@@ -25,11 +27,13 @@ TicTacToe::TicTacToe()
 const String TicTacToe::appName = "TicTacToe";
 
 void TicTacToe::setup(bool rsvp) {
-  Serial.print("TicTacToe: Setup called as ");
-  Serial.println(rsvp ? "guest" : "host");
+  Preferences prefs;
 
-  // If menuTask launched us in response to an RSVP, we're the guest
-  hosting = !rsvp;
+  dprint("TicTacToe: Setup called as ");
+  dprintln(rsvp ? "guest" : "host");
+
+  hosting = !rsvp;   // if launched by RSVP, we're the guest
+  myTurn = hosting;  // player X goes first
 
   // Clear the board and precompute the text offsets
   for (int x = 0; x < 3; x++) {
@@ -38,6 +42,16 @@ void TicTacToe::setup(bool rsvp) {
       board[x][y].xOffset = (x * GRID_SPACING) + x + GRID_LEFT + 6;  // tune for font size
       board[x][y].yOffset = (y * GRID_SPACING) + y + GRID_TOP + 2;   // account for grid lines
     }
+  }
+
+  // Load/init the saved stats!
+  if (prefs.begin(TTT_NVM_KEY, true)) {
+    stats[0] = prefs.getUShort("win", 0);
+    stats[1] = prefs.getUShort("lose", 0);
+    stats[2] = prefs.getUShort("draw", 0);
+    prefs.end();
+  } else {
+    dprintln("ttt: Failed to open preferences!? Stats reset");
   }
 }
 
@@ -90,6 +104,50 @@ void TicTacToe::showGreeting() {
 }
 
 /*
+ *  Display the goodbye message (and save stats).
+ */
+void TicTacToe::showSignOff() {
+  Preferences prefs;
+  button_event_t press;
+
+  display.clearDisplay();
+  display.setFont();
+  display.setTextColor(WHITE);
+  display.setTextSize(1);
+  display.setCursor(getCenterX("Thanks for playing"), 10);
+  display.print("Thanks for playing");
+  display.setTextSize(2);
+  display.setCursor(getCenterX("TicTacToe"), 30);
+  display.println("TicTacToe");
+  display.println();
+  display.setTextSize(1);
+  display.println("Your stats:");
+  display.println("   " + String(stats[0]) + " wins");
+  display.println("   " + String(stats[1]) + " losses");
+  display.println("   " + String(stats[2]) + " draws");
+  display.println();
+  display.println("[Press any button]");
+  display.display();
+
+  // Save updated stats to flash
+  if (prefs.begin(TTT_NVM_KEY, false)) {
+    prefs.putUShort("win", stats[0]);
+    prefs.putUShort("lose", stats[1]);
+    prefs.putUShort("draw", stats[2]);
+    prefs.end();
+  } else {
+    dprintln("ttt: Failed to open preferences!? Stats unsaved");
+  }
+
+  // Press to exit
+  for (;;) {
+    if (xQueueReceive(buttonEvents, &(press), (TickType_t)1000))
+      if (press.action == btnReleased)
+        return;
+  }
+}
+
+/*
  *  On startup, ask the user if they want to host a new game or
  *  find an existing one to join.  Run after the network is up.
  *  Returns false if no other player connects or the user quits.
@@ -108,10 +166,14 @@ bool TicTacToe::hostOrJoin() {
 
     Serial.println("TicTacToe: Starting as host");
 
-    return true;  // XXX
-
-    display.print("Sent invite");
+    display.println("Waiting for another");
+    display.println(" player to join...");
     display.display();
+
+    delay(1000);
+    return true;
+
+    // network still broken
 
     while (waiting && retries < 3) {
 
@@ -157,15 +219,19 @@ bool TicTacToe::hostOrJoin() {
     // Guest: wait for sync packet to start game as player O
     Serial.println("TicTacToe: Starting as guest");
 
-    // can we just jump into th emain loop here?
-    //    start of game:  wait for sync packet from host
-    //    play the game to win/lose/draw
-    //    if they want to play again, switch roles/sides
-    //
+    display.println("Waiting for the");
+    display.println("host to begin...");
+    display.display();
+
+    delay(1000);
+
   }
   return true;
 }
 
+/*
+ *  Clear the board and reset for a new game.
+ */
 void TicTacToe::resetBoard() {
 
   // Clear the board contents
@@ -178,10 +244,9 @@ void TicTacToe::resetBoard() {
   curOn = true;
 
   // Set the message strings
-
-  us = String(netTask.getPlayerName() + hosting ? ": X" : ": O");
-  them = String("[Player 2]" + hosting ? ": O" : ": X");
-  msg = String("Reset");
+  us = String(hosting ? ": X" : ": O") + netTask.getPlayerName();
+  them = String(hosting ? ": O" : ": X") + String("[Player 2]");
+  msg = String("Ready!");
 }
 
 /*
@@ -223,25 +288,21 @@ void TicTacToe::drawScreen() {
     }
   }
 
-  // place some text
-  drawMessage(Player1, "Player 1:  X");
-  drawMessage(Player2, "Player 2:  O");
-  drawMessage(Status, "Ready!");
-
-  button_event_t press;
-  while (!xQueueReceive(buttonEvents, &(press), (TickType_t)100))
-    ;
+  // Draw the text fields
+  drawMessage(Player1, us);
+  drawMessage(Player2, them);
+  drawMessage(Status, msg);
 }
 
 /*
  *  Print a message string in the P1, P2 or MSG areas.
  */
-void TicTacToe::drawMessage(MsgLine which, String msg) {
+void TicTacToe::drawMessage(MsgLine which, String msg, uint8_t color) {
   int y;
 
-  if (which == Player1)       y = P1_OFFSET;
-  else if (which == Player2)  y = P2_OFFSET;
-  else if (which == Status)   y = MSG_OFFSET;
+  if (which == Player1) y = P1_OFFSET;
+  else if (which == Player2) y = P2_OFFSET;
+  else if (which == Status) y = MSG_OFFSET;
   else return;
 
   display.setTextSize(1);
@@ -293,21 +354,24 @@ void TicTacToe::trackCursor(uint8_t dir) {
 /*
  *  Claim a square.  If we're hosting, try to place an X, otherwise O.
  *  Return true and update the display if the move is legal, otherwise
- *  blink the highlight and return false.
+ *  blink the highlight and return false.  If it's not our turn, just
+ *  blink to remind the user to be patient. :-)
  */
-bool TicTacToe::claimSquare() {
+bool TicTacToe::claimSquare(bool host) {
 
   bool blink = curOn;
 
-  if (board[curX][curY].mark == ' ') {
-      board[curX][curY].mark = (hosting ? 'x' : 'o');
+  if (myTurn) {
+    if (board[curX][curY].mark == ' ') {
+      board[curX][curY].mark = (host ? 'x' : 'o');
 
-    // Draw it
-    display.setTextSize(2);
-    display.setCursor(board[curX][curY].xOffset, board[curX][curY].yOffset);
-    display.print(board[curX][curY].mark);
-    display.display();
-    return true;
+      // Draw it
+      display.setTextSize(2);
+      display.setCursor(board[curX][curY].xOffset, board[curX][curY].yOffset);
+      display.print(board[curX][curY].mark);
+      display.display();
+      return true;
+    }
   }
 
   // Blink the highlight to indicate no good
@@ -395,6 +459,58 @@ Condition TicTacToe::updateCondition() {
   return Undecided;
 }
 
+bool TicTacToe::askToPlayAgain() {
+
+  msg = String("Play again?");
+  delay(1000);
+  return true;
+}
+
+/*
+ *  Send an update to the other player based on our
+ *  current state.  Uses all the globals.  Bleah.
+ */
+void TicTacToe::sendUpdate() {
+
+  switch (state) {
+
+    case Reset:
+      /*
+      when our state is Reset, we send a Sync packet
+      with sequence # 0.  This tells the other side
+      we're ready to go.  They init their screen and
+      return the Sync.  We then shift to Undecided and
+      trust they have done the same
+      */
+      break;
+
+    case Undecided:
+      /*
+        send the curx, cury.  the other side should
+        have an identical view of the board and compute
+        the same win condition.
+      */
+      myTurn = !myTurn;
+      break;
+
+    case Win:
+    case Lose:
+    case Draw:
+      /*
+        these are no-ops?
+      */
+      break;
+
+    case Quit:
+      /*
+        tell the other side we're bailing out
+      */
+      break;
+  }
+}
+
+void TicTacToe::recvUpdate() {
+}
 
 /*
  *  Tic Tac Toe main loop
@@ -410,9 +526,9 @@ void TicTacToe::run() {
 
   button_event_t press;
   bool running = true;
-  Condition state = Undecided;
+  Condition state = Reset;
 
-  Serial.println("TicTacToe: Task starting");
+  dprintln("TicTacToe: Task starting");
 
   showGreeting();
 
@@ -423,80 +539,102 @@ void TicTacToe::run() {
     running = hostOrJoin();
   }
 
-  // temp/testing
-
-  resetBoard();
-  drawScreen();
-
-  curOn = true;
-  drawHighlight(curX, curY, curOn);
-
+  // Run the ersatz state machine
   while (running) {
 
-    while (xQueueReceive(buttonEvents, &(press), (TickType_t)50)) {
-      if (press.action == btnReleased || press.action == btnRepeat) {
+    if (state == Reset) {
+      // Set up the initial conditions
+      resetBoard();
+      drawScreen();
 
-        switch (press.id) {
-          case BTN_UP:
-          case BTN_DN:
-          case BTN_LT:
-          case BTN_RT:
-            trackCursor(press.id);
-            break;
+      curOn = true;
+      drawHighlight(curX, curY, curOn);
 
-          case BTN_A:
-            // for debugging: place an X
-            hosting = true;
-            claimSquare();
-            break;
+      state = Undecided;
+      myTurn = hosting;
+      // And fall straight into the main loop
+    }
 
-          case BTN_B:
-            // for debugging: place an O
-            hosting = false;
-            claimSquare();
-            break;
+    while (state == Undecided) {
 
-          case BTN_C:
-            running = false;
-            break;
-        }
+      if (xQueueReceive(buttonEvents, &(press), (TickType_t)25)) {
+        if (press.action == btnReleased || press.action == btnRepeat) {
 
-        // Since something changed, check the win condition
-        state = updateCondition();
-
-        if (state != Undecided) {
-          // Turn off the highlight
-          curOn = false;
-          drawHighlight(curX, curY, curOn);
-
-          // Update the status line
-          switch (state) {
-            case Win:
-              drawMessage(Status, "You win!");
-              stats[Win]++;
+          switch (press.id) {
+            case BTN_UP:
+            case BTN_DN:
+            case BTN_LT:
+            case BTN_RT:
+              trackCursor(press.id);
               break;
 
-              case Lose:
-              drawMessage(Status, "You lose.");
-              stats[Lose]++;
+            case BTN_A:
+              // for debugging: place an X
+              if (claimSquare(true)) {
+                state = updateCondition();
+                sendUpdate();
+              }
               break;
 
-              case Draw:
-              drawMessage(Status, "It's a draw.");
-              stats[Draw]++;
+            case BTN_B:
+              // for debugging: place an O
+              if (claimSquare(false)) {
+                state = updateCondition();
+                sendUpdate();
+              }
+              break;
+
+            case BTN_C:
+              state = Quit;
+              running = false;
               break;
           }
         }
       }
+    }
+
+    // Turn off the highlight
+    curOn = false;
+    drawHighlight(curX, curY, curOn);
+
+    // If they quit bail out now
+    if (!running) continue;
+
+    // Otherwise, check the end condition
+    switch (state) {
+      case Win:
+        drawMessage(Status, "You win!");
+        stats[0]++;
+        break;
+
+      case Lose:
+        drawMessage(Status, "You lose.");
+        stats[1]++;
+        break;
+
+      case Draw:
+        drawMessage(Status, "It's a draw.");
+        stats[2]++;
+        break;
+    }
+
+    // Go again?
+    if (askToPlayAgain()) {
+      state = Reset;
+      hosting = !hosting;
+      // todo: swap sides! reset the messages
+      // tood: inform the other player
+    } else {
+      // Fall through to end
+      running = false;
     }
   }
 
   // Free up the network connection
   netTask.destroyQueue(netId);
 
-  // record and present stats, goodbye screen
+  // Save stats and exit gracefully
+  showSignOff();
 
-  // Wait for press to return to menu
-
-  Serial.println("TicTacToe: Task complete");
+  dprintln("TicTacToe: Task complete");
 }

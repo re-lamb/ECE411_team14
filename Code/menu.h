@@ -22,7 +22,7 @@
 #define MENU_NUM_ITEMS (MENU_MAX_ITEMS - 1)
 
 #define MENU_HEADER   "~ Menu ~"
-#define MENU_BORDER   3     // 1 pixel hairline
+#define MENU_BORDER   5     // 1 pixel hairline
 #define MENU_ICON_SZ  16    // 16 x 16 square
 #define MENU_X_OFFSET (MENU_BORDER + MENU_ICON_SZ + 1)
 #define MENU_Y_OFFSET (MENU_BORDER * 2)

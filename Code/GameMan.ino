@@ -135,7 +135,7 @@ void fadeSplash() {
 
   display.setTextSize(2);
   x1 = getCenterX("Welcome");
-  x2 = getCenterX(netTask.getPlayerName());
+  x2 = getCenterX(netTask.getPlayerName().c_str());
   y = display.height() / 2;
 
   // Lot of hardcodey bits here, it's just a one off.
@@ -172,7 +172,7 @@ void setup() {
 
   // Setup serial port and announce ourselves
   Serial.begin(115200);
-  while (!Serial) delay(200);
+  delay(800);
 
   Serial.println();
   Serial.println("GameMan v" + String(GM_VERSION) + " initializing");

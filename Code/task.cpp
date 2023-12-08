@@ -93,3 +93,19 @@ TaskHandle_t GMTask::getHandle() {
 bool GMTask::isRunning() {
   return (_taskHandle != NULL && _taskRunning);
 }
+
+String GMTask::uptime() {
+  char buf[10];
+
+  unsigned long milliseconds = millis();
+  unsigned long seconds = milliseconds / 1000;
+  unsigned long minutes = seconds / 60;
+  unsigned long hours = minutes / 60;
+
+  seconds %= 60;
+  minutes %= 60;
+  hours %= 24;
+
+  snprintf(buf, 10, "%0d:%02d:%02d", hours, minutes, seconds);
+  return String(buf);
+}

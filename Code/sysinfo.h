@@ -24,7 +24,11 @@ class SysInfo : public GMTask {
 
   private:
     void run() override;
+    void showHeader();
     void showSystemInfo();
+    int showHWInfo();
+    int showPlayerInfo();
+    int showNetInfo();
 };
 
 #endif

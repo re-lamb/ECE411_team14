@@ -120,7 +120,7 @@ class NetworkTask : public GMTask {
     String getNodeAddr();
 
     // Player stuff
-    char *getPlayerName();
+    String getPlayerName();
     void setPlayerName(char *name);
     int findPlayer(char *name);
 
@@ -134,6 +134,7 @@ class NetworkTask : public GMTask {
     static int pktStats[6];
 
     void dispatch();
+    void addPeer(const uint8_t *mac);
     void sendAccounting(esp_err_t err);
     void dumpStats();
 

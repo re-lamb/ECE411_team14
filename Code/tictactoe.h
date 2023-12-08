@@ -32,7 +32,7 @@
  *  TicTacToe network protocol is super simple:  one format
  *  and the type code determines what the player intends.
  *      PLAY  - current player places an X or O at [x, y]
- *      DRAW  - sender offers a draw
+ *      DRAW  - sender offers a draw (not implemented)
  *      QUIT  - sender is done, no response expected
  *      SYNC  - start a game/play again?
  */
@@ -40,9 +40,6 @@
 #define TTT_PLAY 0x50
 #define TTT_DRAW 0x44
 #define TTT_QUIT 0x51
-
-enum MsgLine : byte { Player1, Player2, Status };
-enum Condition : byte { Undecided, Win, Lose, Draw };
 
 typedef struct TTTpkt {
   uint8_t type;                 // keep it brutally simple
@@ -53,12 +50,14 @@ typedef struct TTTpkt {
   uint8_t y;                    // y position of this play
 } ttt_packet_t;
 
-
 typedef struct position {
   char mark;        // literally ' ', 'X' or 'O' :-)
   int16_t xOffset;  // precomputed x coord for text placement
   int16_t yOffset;  // precomputed y coord
 } Square;
+
+enum MsgLine : byte { Player1, Player2, Status };
+enum Condition : byte { Reset, Undecided, Win, Lose, Draw, Quit };
 
 class TicTacToe : public GMTask {
 public:
@@ -72,15 +71,18 @@ private:
 
   void showGreeting();
   bool startNetwork();
-  bool hostOrJoin();
-
+  bool hostOrJoin();  // move to menuTask?
   void resetBoard();
   void drawScreen();
-  void drawMessage(MsgLine which, String msg);
+  void drawMessage(MsgLine which, String msg, uint8_t color = WHITE);
   void drawHighlight(uint8_t x, uint8_t y, bool on);
   void trackCursor(uint8_t dir);
-  bool claimSquare();
+  bool claimSquare(bool host);
+  void sendUpdate();
+  void recvUpdate();
   Condition updateCondition();
+  bool askToPlayAgain();
+  void showSignOff();
 
   // Connection to the network
   int netId;
@@ -95,13 +97,15 @@ private:
   // The simple playing field
   Square board[3][3];
 
-  uint8_t curX = 0;
-  uint8_t curY = 0;
-  bool curOn = false;
   Condition state;
+  uint8_t seqNum;
+  uint8_t curX;
+  uint8_t curY;
+  bool curOn;
+  bool myTurn;
 
   // Wins, losses, draws
-  int stats[3];
+  uint16_t stats[3];
 };
 
 #endif

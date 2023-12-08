@@ -26,6 +26,10 @@ void AboutBox::setup(bool rsvp) {
 
 void AboutBox::showAboutBox() {
 
+  const char *msg = "Press any button";
+  bool blinkOn = false;
+  button_event_t press;
+
   String buf = "Version " + String(GM_VERSION);
   int16_t y = display.height() / 2;
 
@@ -40,7 +44,46 @@ void AboutBox::showAboutBox() {
   display.setCursor(getCenterX(buf.c_str()), y - 10);
   display.print(buf);
   display.display();
+  
+  display.setTextSize(1);
+  int16_t x = getCenterX(msg);
+
+  for (;;) {
+
+    // Use the button timeout of 500ms as the blink rate :-)
+    if (xQueueReceive(buttonEvents, &(press), (TickType_t)500)) {
+      if (press.action == btnReleased) return;
+    }
+
+    blinkOn = !blinkOn;
+    display.setCursor(x, display.height() - 10);
+    display.setTextColor(blinkOn ? WHITE : BLACK);
+    display.print(msg);
+    display.display();
+  }
 }
+
+// rollCredits()
+// animate a little scroller and blink the continue message
+/*
+    Static const String PROGMEM credits[] = {
+      " ",
+      "Portland State",
+      "University",
+      "ECE411",
+      "Fall, 2023",
+      " ",
+      "Team 14",
+      "~~~~~~~",
+      "R. Elliot Lamb",
+      "Joe x",
+      "A",
+      "B",
+      "C"
+      "~~~~~~~",
+      " "
+    }
+*/
 
 /*
  * About Box main loop
@@ -51,26 +94,9 @@ void AboutBox::showAboutBox() {
  */
 void AboutBox::run() {
 
-  const char *msg = "Press any button";
-  bool blinkOn = false;
-  button_event_t press;
-
-  Serial.println("AboutBox: Task starting");
+  dprintln("AboutBox: Task starting");
 
   showAboutBox();
 
-  display.setTextSize(1);
-  int16_t x = getCenterX(msg);
-
-  // Use the button timeout of 500ms as the blink rate :-)
-  while (!xQueueReceive(buttonEvents, &(press), (TickType_t)500)) {
-
-    blinkOn = !blinkOn;
-    display.setCursor(x, display.height() - 10);
-    display.setTextColor(blinkOn ? WHITE : BLACK);
-    display.print(msg);
-    display.display();
-  }
-
-  Serial.println("AboutBox: Task complete");
+  dprintln("AboutBox: Task complete");
 }

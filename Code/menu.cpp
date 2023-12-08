@@ -51,15 +51,13 @@ void MenuTask::setup(bool rsvp) {
   strncpy(items[2].progName, TicTacToe::appName.c_str(), MENU_MAX_CHARS);
 
   // TBD
-  items[3].icon = NULL;
   items[3].prog = NULL;
+  items[3].icon = bship16_bmp;
   strncpy(items[3].progName, "Battleship", MENU_MAX_CHARS);
 
   items[4].prog = NULL;
   items[4].icon = about16_bmp;
   strncpy(items[4].progName, "MazeWar!", MENU_MAX_CHARS);
-
-  Serial.println("menu: Init complete");
 }
 
 /*

@@ -83,6 +83,9 @@ API
 
 TBD.
 
+Set DEBUG to 0 in GameMan.h to disable a ton of serial port debugging
+output; this may have a negligible impact on memory or performance.
+
 The "SysInfo" app (or maybe AboutBox?) lets the user customize their
 unit by entering a name or tag through the keypad.  This tag is then
 associated with their GM's MAC address and included in IFF broadcasts

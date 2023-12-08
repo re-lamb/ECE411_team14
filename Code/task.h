@@ -42,6 +42,7 @@ protected:
   static void delay(int ms);
   static bool elapsed(int ms, TickType_t since);
   static bool elapsed(int ms, TickType_t since, TickType_t now);
+  static String uptime();
 
 private:
   const char *_taskName;

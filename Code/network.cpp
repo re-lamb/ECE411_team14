@@ -26,7 +26,7 @@
 #define VALID(x) (x >= 0 && x < MAX_CLIENTS && clients[x].inUse)
 
 NetworkTask::NetworkTask()
-  : GMTask("NET") {     // , 8192, 2, PRO_CPU_NUM) {
+  : GMTask("NET") {  // , 8192, 2, PRO_CPU_NUM) {
 
   // Maybe not required, but good practice?
   initialized = false;
@@ -72,15 +72,8 @@ void NetworkTask::setup(bool rsvp) {
     initialized = true;
   }
 
-  // Register the broadcast address as a peer?
-  esp_now_peer_info_t all;
-  memset(&all, 0, sizeof(esp_now_peer_info_t));  // work around bug in esp-now 2.x
-  memcpy(all.peer_addr, broadcast, 6);
-
-  err = esp_now_add_peer(&all);
-  if (err != ESP_OK) {
-    Serial.printf("net: Error %d registering the broadcast peer!\n", err);
-  }
+  // Register the broadcast address as a peer
+  addPeer(broadcast);
 
   // Print MAC Address to Serial monitor
   dprint("net: MAC Address: ");
@@ -238,7 +231,7 @@ int NetworkTask::sendAll(gm_packet_t pkt) {
 
   // Send message via ESP-NOW
   esp_err_t result = esp_now_send(broadcast, (uint8_t *)&pkt, sizeof(gm_packet_t));
-  
+
   dprintf("net: Sent broadcast (type %d)\n", pkt.pktType);
   sendAccounting(result);
   return result;
@@ -298,7 +291,7 @@ void NetworkTask::recvCallback(const uint8_t *mac_addr, const uint8_t *data, int
 
   memcpy(&pkt, data, data_len);
 
-  if (xQueueSendToBack(incoming, &(pkt), (TickType_t)0) != pdTRUE) {
+  if (xQueueSend(incoming, &(pkt), (TickType_t)0) != pdTRUE) {
     Serial.println("net: Incoming queue full, packet dropped!");
     pktStats[pktRecvOverflow]++;
   } else {
@@ -435,6 +428,7 @@ void NetworkTask::receiveIFF(QueueHandle_t q) {
         if (playerNum < 0) {
           // A new friend!  Add 'em
           playerNum = addPlayer(iff.who, pkt.srcAddr);
+          addPeer(pkt.srcAddr);
         } else {
           // An old friend!  Update 'em
           players[playerNum].lastSeen = xTaskGetTickCount();
@@ -500,8 +494,8 @@ void NetworkTask::dumpStats() {
 /*
  *  Get or set the player's name (on this node)
  */
-char *NetworkTask::getPlayerName() {
-  return players[0].tag;
+String NetworkTask::getPlayerName() {
+  return String(players[0].tag);
 }
 
 void NetworkTask::setPlayerName(char *name) {
@@ -536,7 +530,7 @@ int NetworkTask::addPlayer(char *name, uint8_t *node) {
       players[p].lastSeen = xTaskGetTickCount();
 
       // Add them as a network peer if they aren't there already
-      
+      addPeer(players[p].node);
       return p;
     }
   }
@@ -545,6 +539,27 @@ int NetworkTask::addPlayer(char *name, uint8_t *node) {
   return -1;  // fix this if more GM hardware ever gets made :-)
 }
 
+/*
+ *  Add a node address to the ESP-NOW peer list (so we can send
+ *  packets to them directly, not just broadcasts).
+ */
+void NetworkTask::addPeer(const uint8_t *mac) {
+  esp_now_peer_info_t p;
+  esp_err_t err;
+
+  if (!esp_now_is_peer_exist(mac)) {
+
+    memset(&p, 0, sizeof(esp_now_peer_info_t));  // work around bug in esp-now 2.x
+    memcpy(p.peer_addr, mac, ADDR_LEN);
+
+    err = esp_now_add_peer(&p);
+    if (err == ESP_OK) {
+      dprintf("net: Added peer %s\n", fmtMAC(mac));
+    } else {
+      Serial.printf("net: Error %d registering peer!\n", err);
+    }
+  }
+}
 
 /*
  *  NetworkTask main loop

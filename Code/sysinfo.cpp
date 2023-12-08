@@ -50,33 +50,137 @@ uint8_t SysInfo::getBatteryAvail() {
 }
 
 /*
- *  For now, a static info display.  Should be extended to have
- *  more info AND allow setting the player tag (in nvram)
+ *  Clear screen and print common header
  */
-void SysInfo::showSystemInfo() {
-
+void SysInfo::showHeader() {
+  
   display.clearDisplay();
   display.setFont();
   display.setTextSize(2);
   display.setTextColor(WHITE);
-  display.setCursor(getCenterX("Sys Info"), 10);
+  display.setCursor(getCenterX("Sys Info"), 8);
   display.println("Sys Info");
   display.println();
-
   display.setTextSize(1);
-  display.println("Hardware version:");
-  display.println("  " + String(HW_VERSION));
-  display.println("MAC address:");
+}
+
+/*
+ *  For now, a static info display.  Should be extended to have
+ *  more info AND allow setting the player tag (in nvram)
+ */
+int SysInfo::showHWInfo() {
+  button_event_t press;
+  uint16_t upX, upY;
+  uint16_t pctX, pctY;
+  TickType_t lastBatt = xTaskGetTickCount();
+
+  showHeader();
+  display.println("Address:");
   display.println("  " + netTask.getNodeAddr());
-  display.println("Battery left:");
-  display.println("  " + String(getBatteryAvail()) + "%");
+  display.println();
+  display.println("Hardware: version " + String(HW_VERSION));
+  display.println();
+  display.print("Battery:  ");
+  pctX = display.getCursorX();
+  pctY = display.getCursorY();
+  display.println(String(getBatteryAvail()) + "%");
+  display.println();
+  display.print("Uptime:   ");
+  upX = display.getCursorX();
+  upY = display.getCursorY();
+  display.print(uptime());
+  display.setCursor(0, display.height() - 10);
+  display.print("                -->");
   display.display();
 
-  // A lot more to do here:
-  //  allow customizing the player name (and save it to nvs)
-  //  show active network players and what they're doing
-  //  show available memory!  and task info, if available
-  //  show uptime!
+  for (;;) {
+
+    // Update the uptime while waiting for a button press to exit
+    if (xQueueReceive(buttonEvents, &(press), (TickType_t)1000)) {
+      if (press.action == btnReleased) {
+        switch (press.id) {
+          case BTN_RT:  return 2;   // next page
+          case BTN_LT:  break;      // ignore
+          default:      return 0;   // exit
+        }
+      }
+    }
+
+    display.setCursor(upX, upY);
+    display.fillRect(upX, upY, display.width() - upX, 10, BLACK);
+    display.print(uptime());
+    display.display();
+
+    // Update the battery charge less frequently
+    if (elapsed(60000, lastBatt)) {
+      display.setCursor(pctX, pctY);
+      display.fillRect(pctX, pctY, display.width() - pctX, 10, BLACK);
+      display.print(String(getBatteryAvail()) + "%");
+      display.display();
+      lastBatt = xTaskGetTickCount();
+    }
+  }
+}
+
+int SysInfo::showPlayerInfo() {
+  button_event_t press;
+
+  showHeader();
+  display.println("Player info/edit");
+  display.println("goes here (TBD)");
+  display.setCursor(0, display.height() - 10);
+  display.print("<--             -->");
+  display.display();
+
+  for (;;) {
+
+    // Update the uptime while waiting for a button press to exit
+    if (xQueueReceive(buttonEvents, &(press), (TickType_t)1000)) {
+      if (press.action == btnReleased) {
+        switch (press.id) {
+          case BTN_RT:  return 3;   // next page
+          case BTN_LT:  return 1;   // prev page
+          default:      return 0;   // exit
+        }
+      }
+    }
+  }
+}
+
+
+int SysInfo::showNetInfo() {
+  button_event_t press;
+
+  showHeader();
+  display.println("Network info");
+  display.println("goes here (TBD)");
+  display.setCursor(0, display.height() - 10);
+  display.print("<--");
+  display.display();
+
+  for (;;) {
+
+    // Update the uptime while waiting for a button press to exit
+    if (xQueueReceive(buttonEvents, &(press), (TickType_t)1000)) {
+      if (press.action == btnReleased) {
+        switch (press.id) {
+          case BTN_RT:  break;      // no next page
+          case BTN_LT:  return 2;   // prev page
+          default:      return 0;   // exit
+        }
+      }
+    }
+  }
+}
+
+void SysInfo::showSystemInfo() {
+  int page = 1;
+
+  while (page > 0) {
+    if (page == 1)      page = showHWInfo();
+    else if (page == 2) page = showPlayerInfo();
+    else if (page == 3) page = showNetInfo();
+  } 
 }
 
 /*
@@ -89,15 +193,10 @@ void SysInfo::showSystemInfo() {
  * other prefs like brightness, sleep time, etc :-)
  */
 void SysInfo::run() {
-  button_event_t press;
 
-  Serial.println("SysInfo: Task starting");
+  dprintln("SysInfo: Task starting");
 
   showSystemInfo();
 
-  while (!xQueueReceive(buttonEvents, &(press), (TickType_t)0)) {
-    delay(500);
-  }
-
-  Serial.println("SysInfo: Task complete");
+  dprintln("SysInfo: Task complete");
 }
